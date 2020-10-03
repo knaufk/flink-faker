@@ -1,0 +1,14 @@
+connector:
+  type: faker
+  packaged: true
+  source: true
+  sink: false
+  lookup: false
+  properties:
+    - key: connector
+      required: true
+      description: Must be set to 'faker' to configure this connector.
+    - key: fields.<fieldname>.expression
+      required: true
+      description: Java Faker expression for this field
+
