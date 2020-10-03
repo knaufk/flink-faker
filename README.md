@@ -1,8 +1,10 @@
 # flink-faker
 
-flink-faker is am Apache Flink [table source](https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/table/connectors/) that generates fake data based on a [Java Faker](https://github.com/DiUS/java-faker) expression for each column.
+flink-faker is an Apache Flink [table source](https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/table/connectors/) 
+that generates fake data based on the [Java Faker](https://github.com/DiUS/java-faker) expression 
+provided for each column.
 
-This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble.) 
+This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble). 
 
 ## Build
 
