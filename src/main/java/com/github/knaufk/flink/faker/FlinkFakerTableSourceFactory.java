@@ -4,6 +4,8 @@ import static org.apache.flink.configuration.ConfigOptions.key;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import com.github.javafaker.Faker;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.TableSchema;
@@ -23,6 +25,9 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
   @Override
   public DynamicTableSource createDynamicTableSource(final Context context) {
+
+    Faker faker = new Faker();
+
     CatalogTable catalogTable = context.getCatalogTable();
 
     Configuration options = new Configuration();
@@ -52,6 +57,12 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
             "Every column needs a corresponding expression. No expression found for "
                 + fieldName
                 + ".");
+      }
+
+      try {
+        faker.expression(fieldExpression);
+      } catch (RuntimeException e) {
+        throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
       }
 
       fieldExpressions[i] = fieldExpression;

@@ -62,6 +62,22 @@ class FlinkFakerTableSourceFactoryTest {
         .withStackTraceContaining("No expression found for f2.");
   }
 
+    @Test
+    public void testInvalidExpressionIsInvalid() {
+
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(
+                        () -> {
+                            DescriptorProperties descriptorProperties = new DescriptorProperties();
+                            descriptorProperties.putString(FactoryUtil.CONNECTOR.key(), "faker");
+                            descriptorProperties.putString("fields.f0.expression", "#{number.abc}");
+                            descriptorProperties.putString("fields.f1.expression", "#{number.randomDigit}");
+
+                            createTableSource(descriptorProperties, VALID_SCHEMA);
+                        })
+                .withStackTraceContaining("Invalid expression for column \"f0\".");
+    }
+
   @Test
   public void testValidTableSourceIsValid() {
 
