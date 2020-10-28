@@ -10,14 +10,16 @@ This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble
 
 ## Build
 
-```
+```shell script
 mvn package
 ```
 
 ## Usage
 
-```
-CREATE TABLE heros (
+### As ScanTableSource
+
+```sql
+CREATE TEMPORARY TABLE heros (
   name STRING,
   `power` STRING, 
   age INT
@@ -25,23 +27,42 @@ CREATE TABLE heros (
   'connector' = 'faker', 
   'fields.name.expression' = '#{superhero.name}',
   'fields.power.expression' = '#{superhero.power}',
-  'fields.age.expression' = "#{number.numberBetween '0','1000'}"
+  'fields.age.expression' = "#{number.numberBetween ''0'',''1000''}"
 );
 ```
 
-```
-CREATE TABLE harrypotter (
-  `character` STRING,
-  quote STRING
+### As LookupTableSource
+
+```sql
+CREATE TEMPORARY TABLE location_updates (
+  `character_id` INT,
+  `location` STRING
 )
 WITH (
   'connector' = 'faker', 
-  'fields.character.expression' = '#{harry_potter.characters}',
-  'fields.quote.expression' = '#{harry_potter.quote}'
+  'fields.character_id.expression' = '#{number.numberBetween ''0'',''100''}',
+  'fields.location.expression' = '#{harry_potter.location}'
 );
+
+CREATE TEMPORARY TABLE characters (
+  `character_id` INT,
+  name STRING
+)
+WITH (
+  'connector' = 'faker', 
+  'fields.character_id.expression' = '#{number.numberBetween ''0'',''100''}',
+  'fields.name.expression' = '#{harry_potter.characters}'
+);
+
+SELECT 
+  c.character_id,
+  c.location,
+  c.name
+FROM location_updates AS l
+JOIN characters FOR SYSTEM_TIME AS OF characters.character_id = location_updates.character_id AS c;
 ```
 
-Currently, `faker` this source supports the following data types:
+Currently, the `faker` source supports the following data types:
 
 * `CHAR` 
 * `VARCHAR`

@@ -2,11 +2,9 @@ package com.github.knaufk.flink.faker;
 
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.connector.ChangelogMode;
-import org.apache.flink.table.connector.source.DynamicTableSource;
-import org.apache.flink.table.connector.source.ScanTableSource;
-import org.apache.flink.table.connector.source.SourceFunctionProvider;
+import org.apache.flink.table.connector.source.*;
 
-public class FlinkFakerTableSource implements ScanTableSource {
+public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource {
 
   private String[] fieldExpressions;
   private TableSchema schema;
@@ -34,5 +32,11 @@ public class FlinkFakerTableSource implements ScanTableSource {
   @Override
   public String asSummaryString() {
     return "FlinkFakerSource";
+  }
+
+  @Override
+  public LookupRuntimeProvider getLookupRuntimeProvider(LookupContext context) {
+    return TableFunctionProvider.of(
+        new FlinkFakerLookupFunction(fieldExpressions, schema, context.getKeys()));
   }
 }
