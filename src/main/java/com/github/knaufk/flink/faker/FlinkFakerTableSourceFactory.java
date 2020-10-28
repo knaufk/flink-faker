@@ -3,7 +3,9 @@ package com.github.knaufk.flink.faker;
 import static org.apache.flink.configuration.ConfigOptions.key;
 
 import com.github.javafaker.Faker;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
@@ -13,6 +15,7 @@ import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.connector.source.DynamicTableSource;
 import org.apache.flink.table.factories.DynamicTableSourceFactory;
 import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.utils.TableSchemaUtils;
 
 public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
@@ -21,6 +24,19 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
   public static final String FIELDS = "fields";
   public static final String EXPRESSION = "expression";
+
+  public static final List<LogicalTypeRoot> SUPPORTED_ROOT_TYPES =
+      Arrays.asList(
+          LogicalTypeRoot.DOUBLE,
+          LogicalTypeRoot.FLOAT,
+          LogicalTypeRoot.DECIMAL,
+          LogicalTypeRoot.TINYINT,
+          LogicalTypeRoot.SMALLINT,
+          LogicalTypeRoot.INTEGER,
+          LogicalTypeRoot.BIGINT,
+          LogicalTypeRoot.CHAR,
+          LogicalTypeRoot.VARCHAR,
+          LogicalTypeRoot.BOOLEAN);
 
   @Override
   public DynamicTableSource createDynamicTableSource(final Context context) {
@@ -38,12 +54,14 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     for (int i = 0; i < fieldExpressions.length; i++) {
       DataType dataType = schema.getFieldDataType(i).get();
       String fieldName = schema.getFieldName(i).get();
-      if (!dataType.getConversionClass().isAssignableFrom(String.class)) {
+      if (!SUPPORTED_ROOT_TYPES.contains(dataType.getLogicalType().getTypeRoot())) {
         throw new ValidationException(
-            "Only CHAR/VARCHAR/STRING columns are supported by Faker TableSource. "
+            "Only "
+                + SUPPORTED_ROOT_TYPES
+                + " columns are supported by Faker TableSource. "
                 + fieldName
                 + " is "
-                + dataType.getLogicalType()
+                + dataType.getLogicalType().getTypeRoot()
                 + ".");
       }
 
@@ -66,7 +84,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
       fieldExpressions[i] = fieldExpression;
     }
-    return new FlinkFakerTableSource(fieldExpressions);
+    return new FlinkFakerTableSource(fieldExpressions, schema);
   }
 
   @Override

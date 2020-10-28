@@ -16,21 +16,16 @@ mvn package
 
 ## Usage
 
-At this point the source only supports `STRING`, `CHAR` and `VARCHAR` columns.
-
 ```
-CREATE TABLE customers (
-  first_name STRING,
-  last_name STRING, 
-  title STRING, 
-  favorite_beer STRING
-)
-WITH (
+CREATE TABLE heros (
+  name STRING,
+  `power` STRING, 
+  age INT
+) WITH (
   'connector' = 'faker', 
-  'fields.first_name.expression' = '#{name._first_name}',
-  'fields.last_name.expression' = '#{name.last_name}',
-  'fields.title.expression' = '#{name.title}',
-  'fields.favorite_beer.expression' = '#{beer.name}'
+  'fields.name.expression' = '#{superhero.name}',
+  'fields.power.expression' = '#{superhero.power}',
+  'fields.age.expression' = "#{number.numberBetween '0','1000'}"
 );
 ```
 
@@ -45,6 +40,20 @@ WITH (
   'fields.quote.expression' = '#{harry_potter.quote}'
 );
 ```
+
+Currently, `faker` this source supports the following data types:
+
+* `CHAR` 
+* `VARCHAR`
+* `STRING`
+* `TINYINT`
+* `SMALLINT`
+* `INTEGER`
+* `BIGINT`
+* `FLOAT`
+* `DOUBLE`
+* `DECIMAL`
+* `BOOLEAN`
 
 ## License 
 
