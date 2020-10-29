@@ -17,7 +17,7 @@ class FlinkFakerSourceFunctionTest {
     String[] fieldExpressions = new String[] {"#{food.vegetables}", "#{Food.measurement_sizes}"};
     LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, types);
+        new FlinkFakerSourceFunction(fieldExpressions, types, 100, 10);
     flinkFakerSourceFunction.open(new Configuration());
 
     assertThat(flinkFakerSourceFunction.generateNextRow().getArity()).isEqualTo(2);
@@ -43,7 +43,7 @@ class FlinkFakerSourceFunctionTest {
       new VarCharType(Integer.MAX_VALUE), new VarCharType(Integer.MAX_VALUE), new IntType()
     };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, types);
+        new FlinkFakerSourceFunction(fieldExpressions, types, 100, 10);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -85,7 +85,7 @@ class FlinkFakerSourceFunctionTest {
           "#{regexify '(true|false){1}'}",
         };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, types);
+        new FlinkFakerSourceFunction(fieldExpressions, types, 100, 10);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();

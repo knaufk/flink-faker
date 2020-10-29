@@ -8,6 +8,14 @@ connector:
     - key: connector
       required: true
       description: Must be set to 'faker' to configure this connector.
+    - key: number-of-rows
+      required: false
+      description: Total number of rows to emit. By default, the source is unbounded.
+      defaultValue: -1
+    - key: rows-per-second
+      required: false
+      description: Rows per second to control the emit rate.
+      defaultValue: 10000
     - key: fields.<fieldname>.expression
       required: true
       description: Java Faker expression for this field

@@ -12,7 +12,6 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.catalog.CatalogTable;
-import org.apache.flink.table.connector.source.DynamicTableSource;
 import org.apache.flink.table.factories.DynamicTableSourceFactory;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
@@ -24,6 +23,21 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
   public static final String FIELDS = "fields";
   public static final String EXPRESSION = "expression";
+
+  public static final Long ROWS_PER_SECOND_DEFAULT_VALUE = 10000L;
+  public static final Long UNLIMITED_ROWS = -1L;
+
+  public static final ConfigOption<Long> ROWS_PER_SECOND =
+      key("rows-per-second")
+          .longType()
+          .defaultValue(ROWS_PER_SECOND_DEFAULT_VALUE)
+          .withDescription("Rows per second to control the emit rate.");
+
+  public static final ConfigOption<Long> NUMBER_OF_ROWS =
+      key("number-of-rows")
+          .longType()
+          .defaultValue(UNLIMITED_ROWS)
+          .withDescription("Total number of rows to emit. By default, the source is unbounded.");
 
   public static final List<LogicalTypeRoot> SUPPORTED_ROOT_TYPES =
       Arrays.asList(
@@ -39,7 +53,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
           LogicalTypeRoot.BOOLEAN);
 
   @Override
-  public DynamicTableSource createDynamicTableSource(final Context context) {
+  public FlinkFakerTableSource createDynamicTableSource(final Context context) {
 
     Faker faker = new Faker();
 
@@ -84,7 +98,8 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
       fieldExpressions[i] = fieldExpression;
     }
-    return new FlinkFakerTableSource(fieldExpressions, schema);
+    return new FlinkFakerTableSource(
+        fieldExpressions, schema, options.get(ROWS_PER_SECOND), options.get(NUMBER_OF_ROWS));
   }
 
   @Override
@@ -99,6 +114,9 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
   @Override
   public Set<ConfigOption<?>> optionalOptions() {
-    return new HashSet<>();
+    Set<ConfigOption<?>> options = new HashSet<>();
+    options.add(ROWS_PER_SECOND);
+    options.add(NUMBER_OF_ROWS);
+    return options;
   }
 }

@@ -16,10 +16,15 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
 
   private String[] fieldExpressions;
   private LogicalType[] types;
+  private long rowsPerSecond;
+  private long numberOfRows;
 
-  public FlinkFakerSourceFunction(String[] fieldExpressions, LogicalType[] types) {
+  public FlinkFakerSourceFunction(
+      String[] fieldExpressions, LogicalType[] types, long rowsPerSecond, long numberOfRows) {
     this.fieldExpressions = fieldExpressions;
     this.types = types;
+    this.rowsPerSecond = rowsPerSecond;
+    this.numberOfRows = numberOfRows;
   }
 
   @Override
@@ -30,8 +35,44 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
 
   @Override
   public void run(final SourceContext<RowData> sourceContext) throws Exception {
-    while (!cancelled) {
-      sourceContext.collect(generateNextRow());
+
+    final long rowsForSubtask = getRowsForThisSubTask();
+    final long rowsPerSecondForSubtask = getRowsPerSecondForSubTask();
+    long rowsSoFar = 0;
+
+    long nextReadTime = System.currentTimeMillis();
+    while (!cancelled && rowsSoFar < rowsForSubtask) {
+      for (long i = 0; i < rowsPerSecondForSubtask; i++) {
+        if (!cancelled && rowsForSubtask < rowsForSubtask) {
+          sourceContext.collect(generateNextRow());
+          rowsSoFar++;
+        }
+      }
+      nextReadTime += 1000;
+      long toWaitMs = nextReadTime - System.currentTimeMillis();
+      Thread.sleep(toWaitMs);
+    }
+  }
+
+  private long getRowsPerSecondForSubTask() {
+    int numSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
+    int indexOfThisSubtask = getRuntimeContext().getIndexOfThisSubtask();
+    long baseRowsPerSecondPerSubtask = rowsPerSecond / numSubtasks;
+    return (rowsPerSecond % numSubtasks > indexOfThisSubtask)
+        ? baseRowsPerSecondPerSubtask + 1
+        : baseRowsPerSecondPerSubtask;
+  }
+
+  private long getRowsForThisSubTask() {
+    if (numberOfRows == -1) {
+      return Long.MAX_VALUE;
+    } else {
+      int numSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
+      int indexOfThisSubtask = getRuntimeContext().getIndexOfThisSubtask();
+      final long baseNumOfRowsPerSubtask = numberOfRows / numSubtasks;
+      return (numberOfRows % numSubtasks > indexOfThisSubtask)
+          ? baseNumOfRowsPerSubtask + 1
+          : baseNumOfRowsPerSubtask;
     }
   }
 
