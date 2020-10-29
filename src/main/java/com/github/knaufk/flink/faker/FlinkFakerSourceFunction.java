@@ -1,5 +1,7 @@
 package com.github.knaufk.flink.faker;
 
+import static com.github.knaufk.flink.faker.FlinkFakerTableSourceFactory.UNLIMITED_ROWS;
+
 import com.github.javafaker.Faker;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.Configuration;
@@ -43,13 +45,14 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
     long nextReadTime = System.currentTimeMillis();
     while (!cancelled && rowsSoFar < rowsForSubtask) {
       for (long i = 0; i < rowsPerSecondForSubtask; i++) {
-        if (!cancelled && rowsForSubtask < rowsForSubtask) {
-          sourceContext.collect(generateNextRow());
+        if (!cancelled && rowsSoFar < rowsForSubtask) {
+          RowData row = generateNextRow();
+          sourceContext.collect(row);
           rowsSoFar++;
         }
       }
       nextReadTime += 1000;
-      long toWaitMs = nextReadTime - System.currentTimeMillis();
+      long toWaitMs = Math.max(0, nextReadTime - System.currentTimeMillis());
       Thread.sleep(toWaitMs);
     }
   }
@@ -64,7 +67,7 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   }
 
   private long getRowsForThisSubTask() {
-    if (numberOfRows == -1) {
+    if (numberOfRows == UNLIMITED_ROWS) {
       return Long.MAX_VALUE;
     } else {
       int numSubtasks = getRuntimeContext().getNumberOfParallelSubtasks();
