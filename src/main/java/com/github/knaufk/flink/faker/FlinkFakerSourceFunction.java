@@ -4,10 +4,9 @@ import com.github.javafaker.Faker;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
-import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
-import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData> {
@@ -16,11 +15,11 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   private Faker faker;
 
   private String[] fieldExpressions;
-  private TableSchema schema;
+  private LogicalType[] types;
 
-  public FlinkFakerSourceFunction(String[] fieldExpressions, TableSchema schema) {
+  public FlinkFakerSourceFunction(String[] fieldExpressions, LogicalType[] types) {
     this.fieldExpressions = fieldExpressions;
-    this.schema = schema;
+    this.types = types;
   }
 
   @Override
@@ -44,12 +43,10 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   @VisibleForTesting
   RowData generateNextRow() {
     GenericRowData row = new GenericRowData(fieldExpressions.length);
-    DataType[] fieldDataTypes = schema.getFieldDataTypes();
     for (int i = 0; i < fieldExpressions.length; i++) {
-      DataType fieldDataType = fieldDataTypes[i];
-      LogicalTypeRoot logicalType = fieldDataType.getLogicalType().getTypeRoot();
+      LogicalTypeRoot typeRoot = (types[i]).getTypeRoot();
       String value = faker.expression(fieldExpressions[i]);
-      row.setField(i, FakerUtils.stringValueToType(value, logicalType));
+      row.setField(i, FakerUtils.stringValueToType(value, typeRoot));
     }
     return row;
   }

@@ -8,10 +8,17 @@ provided for each column.
 
 This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble). 
 
-## Build
+## Package
 
 ```shell script
 mvn package
+```
+
+## Package for Ververica Platform
+
+```shell script
+mvn package
+docker build . -t vvp-gateway:2.3.0-faker-0.1-SNAPSHOT
 ```
 
 ## Usage
@@ -27,8 +34,10 @@ CREATE TEMPORARY TABLE heros (
   'connector' = 'faker', 
   'fields.name.expression' = '#{superhero.name}',
   'fields.power.expression' = '#{superhero.power}',
-  'fields.age.expression' = "#{number.numberBetween ''0'',''1000''}"
+  'fields.age.expression' = '#{number.numberBetween ''0'',''1000''}'
 );
+
+SELECT * FROM heros;
 ```
 
 ### As LookupTableSource
@@ -36,7 +45,8 @@ CREATE TEMPORARY TABLE heros (
 ```sql
 CREATE TEMPORARY TABLE location_updates (
   `character_id` INT,
-  `location` STRING
+  `location` STRING,
+  proctime AS PROCTIME()
 )
 WITH (
   'connector' = 'faker', 
@@ -56,10 +66,11 @@ WITH (
 
 SELECT 
   c.character_id,
-  c.location,
+  l.location,
   c.name
 FROM location_updates AS l
-JOIN characters FOR SYSTEM_TIME AS OF characters.character_id = location_updates.character_id AS c;
+JOIN characters FOR SYSTEM_TIME AS OF proctime AS c
+ON l.character_id = c.character_id;
 ```
 
 Currently, the `faker` source supports the following data types:

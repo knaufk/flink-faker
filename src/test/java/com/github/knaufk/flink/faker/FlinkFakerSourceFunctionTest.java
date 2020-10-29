@@ -6,6 +6,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.types.logical.*;
 import org.junit.jupiter.api.Test;
 
 class FlinkFakerSourceFunctionTest {
@@ -13,15 +14,10 @@ class FlinkFakerSourceFunctionTest {
   @Test
   public void testSimpleExpressions() throws Exception {
 
-    TableSchema schema =
-        TableSchema.builder()
-            .field("f0", DataTypes.VARCHAR(255))
-            .field("f1", DataTypes.STRING())
-            .build();
-
     String[] fieldExpressions = new String[] {"#{food.vegetables}", "#{Food.measurement_sizes}"};
+    LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, schema);
+        new FlinkFakerSourceFunction(fieldExpressions, types);
     flinkFakerSourceFunction.open(new Configuration());
 
     assertThat(flinkFakerSourceFunction.generateNextRow().getArity()).isEqualTo(2);
@@ -43,8 +39,11 @@ class FlinkFakerSourceFunctionTest {
           "#{superhero.name}", "#{superhero.power}", "#{number.numberBetween '0','1000'}"
         };
 
+    LogicalType[] types = {
+      new VarCharType(Integer.MAX_VALUE), new VarCharType(Integer.MAX_VALUE), new IntType()
+    };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, schema);
+        new FlinkFakerSourceFunction(fieldExpressions, types);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -57,20 +56,19 @@ class FlinkFakerSourceFunctionTest {
   @Test
   public void testSupportedDataTypes() throws Exception {
 
-    TableSchema schema =
-        TableSchema.builder()
-            .field("f0", DataTypes.TINYINT())
-            .field("f1", DataTypes.SMALLINT())
-            .field("f2", DataTypes.INT())
-            .field("f3", DataTypes.BIGINT())
-            .field("f4", DataTypes.DOUBLE())
-            .field("f5", DataTypes.FLOAT())
-            .field("f6", DataTypes.DECIMAL(6, 2))
-            .field("f7", DataTypes.CHAR(10))
-            .field("f8", DataTypes.VARCHAR(255))
-            .field("f9", DataTypes.STRING())
-            .field("f10", DataTypes.BOOLEAN())
-            .build();
+    LogicalType[] types = {
+      new TinyIntType(),
+      new SmallIntType(),
+      new IntType(),
+      new BigIntType(),
+      new DoubleType(),
+      new FloatType(),
+      new DecimalType(6, 2),
+      new CharType(10),
+      new VarCharType(255),
+      new VarCharType(Integer.MAX_VALUE),
+      new BooleanType()
+    };
 
     String[] fieldExpressions =
         new String[] {
@@ -87,7 +85,7 @@ class FlinkFakerSourceFunctionTest {
           "#{regexify '(true|false){1}'}",
         };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, schema);
+        new FlinkFakerSourceFunction(fieldExpressions, types);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();

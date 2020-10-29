@@ -4,9 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.types.logical.*;
 import org.apache.flink.util.Collector;
 import org.junit.jupiter.api.Test;
 
@@ -17,20 +16,19 @@ class FlinkFakerLookupFunctionTest {
 
     ListOutputCollector collector = new ListOutputCollector();
 
-    TableSchema schema =
-        TableSchema.builder()
-            .field("f0", DataTypes.TINYINT())
-            .field("f1", DataTypes.SMALLINT())
-            .field("f2", DataTypes.INT())
-            .field("f3", DataTypes.BIGINT())
-            .field("f4", DataTypes.DOUBLE())
-            .field("f5", DataTypes.FLOAT())
-            .field("f6", DataTypes.DECIMAL(6, 2))
-            .field("f7", DataTypes.CHAR(10))
-            .field("f8", DataTypes.VARCHAR(255))
-            .field("f9", DataTypes.STRING())
-            .field("f10", DataTypes.BOOLEAN())
-            .build();
+    LogicalType[] types = {
+      new TinyIntType(),
+      new SmallIntType(),
+      new IntType(),
+      new BigIntType(),
+      new DoubleType(),
+      new FloatType(),
+      new DecimalType(6, 2),
+      new CharType(10),
+      new VarCharType(255),
+      new VarCharType(Integer.MAX_VALUE),
+      new BooleanType()
+    };
 
     String[] fieldExpressions =
         new String[] {
@@ -50,7 +48,7 @@ class FlinkFakerLookupFunctionTest {
     int[][] keys = {{1, 0}, {2, 0}};
 
     FlinkFakerLookupFunction flinkFakerLookupFunction =
-        new FlinkFakerLookupFunction(fieldExpressions, schema, keys);
+        new FlinkFakerLookupFunction(fieldExpressions, types, keys);
 
     flinkFakerLookupFunction.setCollector(collector);
     flinkFakerLookupFunction.open(null);
