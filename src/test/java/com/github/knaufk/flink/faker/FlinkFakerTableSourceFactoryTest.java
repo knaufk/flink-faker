@@ -34,7 +34,7 @@ class FlinkFakerTableSourceFactoryTest {
       TableSchema.builder()
           .field("f0", DataTypes.STRING())
           .field("f1", DataTypes.VARCHAR(100))
-          .field("f2", DataTypes.TIMESTAMP())
+          .field("f2", DataTypes.DATE())
           .build();
 
   @Test
@@ -66,7 +66,7 @@ class FlinkFakerTableSourceFactoryTest {
                   "fields.f10.expression", "#{regexify '(true|false){1}'}");
               createTableSource(descriptorProperties, INVALID_SCHEMA);
             })
-        .withStackTraceContaining("f2 is TIMESTAMP_WITHOUT_TIME_ZONE.");
+        .withStackTraceContaining("f2 is DATE.");
   }
 
   @Test
@@ -127,21 +127,23 @@ class FlinkFakerTableSourceFactoryTest {
   }
 
   @Test
-  public void testREADMEExamples() {
+  public void testTimestamps() {
 
     DescriptorProperties descriptorProperties = new DescriptorProperties();
     descriptorProperties.putString(FactoryUtil.CONNECTOR.key(), "faker");
 
-    descriptorProperties.putString("fields.first_name.expression", "#{name.first_name}");
-    descriptorProperties.putString("fields.last_name.expression", "#{name.last_name}");
-    descriptorProperties.putString("fields.title.expression", "#{name.title}");
+    descriptorProperties.putString("fields.f0.expression", "#{date.past '15','SECONDS'}");
+    descriptorProperties.putString("fields.f1.expression", "#{date.past '15','SECONDS'}");
+    descriptorProperties.putString("fields.f2.expression", "#{date.past '15','SECONDS'}");
 
     TableSchema tableSchema =
         TableSchema.builder()
-            .field("first_name", DataTypes.STRING())
-            .field("last_name", DataTypes.STRING())
-            .field("title", DataTypes.STRING())
+            .field("f0", DataTypes.TIMESTAMP())
+            .field("f1", DataTypes.TIMESTAMP_WITH_LOCAL_TIME_ZONE())
+            .field("f2", DataTypes.TIMESTAMP_WITH_TIME_ZONE())
             .build();
+
+    createTableSource(descriptorProperties, tableSchema);
   }
 
   private DynamicTableSource createTableSource(

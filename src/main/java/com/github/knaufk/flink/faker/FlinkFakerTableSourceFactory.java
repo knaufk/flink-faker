@@ -50,7 +50,10 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
           LogicalTypeRoot.BIGINT,
           LogicalTypeRoot.CHAR,
           LogicalTypeRoot.VARCHAR,
-          LogicalTypeRoot.BOOLEAN);
+          LogicalTypeRoot.BOOLEAN,
+          LogicalTypeRoot.TIMESTAMP_WITHOUT_TIME_ZONE,
+          LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE,
+          LogicalTypeRoot.TIMESTAMP_WITH_TIME_ZONE);
 
   @Override
   public FlinkFakerTableSource createDynamicTableSource(final Context context) {

@@ -67,7 +67,8 @@ class FlinkFakerSourceFunctionTest {
       new CharType(10),
       new VarCharType(255),
       new VarCharType(Integer.MAX_VALUE),
-      new BooleanType()
+      new BooleanType(),
+      new TimestampType()
     };
 
     String[] fieldExpressions =
@@ -83,13 +84,14 @@ class FlinkFakerSourceFunctionTest {
           "#{Lorem.characters '255'}",
           "#{Lorem.sentence}",
           "#{regexify '(true|false){1}'}",
+          "#{date.past '15','SECONDS'}"
         };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
         new FlinkFakerSourceFunction(fieldExpressions, types, 100, 10);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
-    assertThat(rowData.getArity()).isEqualTo(11);
+    assertThat(rowData.getArity()).isEqualTo(12);
     for (int i = 0; i < fieldExpressions.length; i++) {
       assertThat(rowData.isNullAt(i)).isFalse();
     }

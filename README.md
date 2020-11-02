@@ -86,6 +86,7 @@ Currently, the `faker` source supports the following data types:
 * `DOUBLE`
 * `DECIMAL`
 * `BOOLEAN`
+* `TIMESTAMP`
 
 ## License 
 

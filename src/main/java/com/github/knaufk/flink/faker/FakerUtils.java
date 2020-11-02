@@ -2,10 +2,17 @@ package com.github.knaufk.flink.faker;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import org.apache.flink.table.data.StringData;
+import org.apache.flink.table.data.TimestampData;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 public class FakerUtils {
+
+  public static final String FAKER_DATETIME_FORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
+
+  private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FAKER_DATETIME_FORMAT);;
 
   static Object stringValueToType(String value, LogicalTypeRoot logicalType) {
 
@@ -32,15 +39,14 @@ public class FakerUtils {
         return Double.parseDouble(value);
         //      case DATE:
         //        break;
-        //      case TIME_WITHOUT_TIME_ZONE:
+      case TIME_WITHOUT_TIME_ZONE:
+        return TimestampData.fromInstant(Instant.from(formatter.parse(value)));
+      case TIMESTAMP_WITHOUT_TIME_ZONE:
+        return TimestampData.fromInstant(Instant.from(formatter.parse(value)));
+      case TIMESTAMP_WITH_LOCAL_TIME_ZONE:
+        return TimestampData.fromInstant(Instant.from(formatter.parse(value)));
         //        break;
-        //      case TIMESTAMP_WITHOUT_TIME_ZONE:
-        //        break;
-        //      case TIMESTAMP_WITH_TIME_ZONE:
-        //        break;
-        //      case TIMESTAMP_WITH_LOCAL_TIME_ZONE:
-        //        break;
-        //      case INTERVAL_YEAR_MONTH:
+        //              case INTERVAL_YEAR_MONTH:
         //        break;
         //      case INTERVAL_DAY_TIME:
         //        break;
