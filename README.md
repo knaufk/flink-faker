@@ -88,6 +88,34 @@ Currently, the `faker` source supports the following data types:
 * `BOOLEAN`
 * `TIMESTAMP`
 
+### Connector Options
+
+Connector Option | Default | Description
+-----------------|---------|-------------
+`number-of-rows` | None    | The number of rows to produce. If this is options is set, the source is bounded otherwise it is unbounded and runs indefinitely.
+`rows-per-second`| 10000   | The maximum rate at which the source produces records.
+`fields.<field>.expression` | None | The [Java Faker](https://github.com/DiUS/java-faker) expression to generate the values for this field.
+
+### On Timestamps
+
+For rows of type `TIMESTAMP`, the corresponding Java Faker expression needs to return a timestamp formatted as `EEE MMM dd HH:mm:ss zzz yyyy`. 
+Typically, you would use one of the following expressions: 
+
+```
+CREATE TEMPORARY TABLE timestamp_example (
+  `timestamp1` TIMESTAMP(3),
+  `timestamp2` TIMESTAMP(3),
+)
+WITH (
+  'connector' = 'faker', 
+  'fields.timestamp1.expression' = '#{date.past ''15'',''SECONDS''}',
+  'fields.timestamp2.expression' = '#{date.past ''15'',''5'',''SECONDS''}',
+);
+```
+
+For `timestamp1` Java Faker will generate a random timestamp that lies at most 15 seconds in the past. 
+For `timestamp2` Java Faker will generate a random timestamp, that lies at most 15 seconds in the past, but at least 5 seconds. 
+
 ## License 
 
 Copyright © 2020 Konstantin Knauf

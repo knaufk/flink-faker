@@ -84,7 +84,7 @@ class FlinkFakerSourceFunctionTest {
           "#{Lorem.characters '255'}",
           "#{Lorem.sentence}",
           "#{regexify '(true|false){1}'}",
-          "#{date.past '15','SECONDS'}"
+          "#{date.past '15','5','SECONDS'}"
         };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
         new FlinkFakerSourceFunction(fieldExpressions, types, 100, 10);
