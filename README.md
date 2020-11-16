@@ -13,13 +13,13 @@ This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble
 ## Package
 
 ```shell script
-mvn package
+mvn clean package
 ```
 
 ## Package for Ververica Platform
 
 ```shell script
-mvn package
+mvn clean package
 docker build . -t vvp-gateway:2.3.0-faker-0.1-SNAPSHOT
 ```
 
