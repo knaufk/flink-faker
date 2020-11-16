@@ -20,7 +20,7 @@ mvn clean package
 
 ```shell script
 mvn clean package
-docker build . -t vvp-gateway:2.3.0-faker-0.1-SNAPSHOT
+docker build . -t vvp-gateway:2.3.1-faker-0.1.0
 ```
 
 ## Usage
