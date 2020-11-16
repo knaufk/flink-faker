@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import org.apache.flink.table.data.DecimalData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.data.TimestampData;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
@@ -24,7 +25,8 @@ public class FakerUtils {
       case BOOLEAN:
         return Boolean.parseBoolean(value);
       case DECIMAL:
-        return new BigDecimal(value);
+        BigDecimal bd = new BigDecimal(value);
+        return DecimalData.fromBigDecimal(bd, bd.precision(), bd.scale());
       case TINYINT:
         return Byte.parseByte(value);
       case SMALLINT:
