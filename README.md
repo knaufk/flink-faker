@@ -131,8 +131,8 @@ CREATE TEMPORARY TABLE orders (
 )
 WITH (
   'connector' = 'faker', 
-  'fields.character_id.expression' = '#{number.numberBetween ''0'',''100''}',
-  'fields.name.expression' = '#{regexify ''(RECEIVED|SHIPPED|CANCELLED){1}''}'
+  'fields.order_id.expression' = '#{number.numberBetween ''0'',''100''}',
+  'fields.order_status.expression' = '#{regexify ''(RECEIVED|SHIPPED|CANCELLED){1}''}'
 );
 ```
 
@@ -140,5 +140,4 @@ WITH (
 
 Copyright © 2020 Konstantin Knauf
 
-Distributed under Apache License, Version 2.0. 
-
+Distributed under Apache License, Version 2.0.
