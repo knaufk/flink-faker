@@ -3,7 +3,7 @@ connector:
   packaged: true
   source: true
   sink: false
-  lookup: false
+  lookup: true
   properties:
     - key: connector
       required: true
