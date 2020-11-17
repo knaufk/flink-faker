@@ -106,13 +106,15 @@ Typically, you would use one of the following expressions:
 ```
 CREATE TEMPORARY TABLE timestamp_example (
   `timestamp1` TIMESTAMP(3),
-  `timestamp2` TIMESTAMP(3),
+  `timestamp2` TIMESTAMP(3)
 )
 WITH (
   'connector' = 'faker', 
   'fields.timestamp1.expression' = '#{date.past ''15'',''SECONDS''}',
-  'fields.timestamp2.expression' = '#{date.past ''15'',''5'',''SECONDS''}',
+  'fields.timestamp2.expression' = '#{date.past ''15'',''5'',''SECONDS''}'
 );
+
+SELECT * FROM timestamp_example;
 ```
 
 For `timestamp1` Java Faker will generate a random timestamp that lies at most 15 seconds in the past. 
@@ -134,6 +136,8 @@ WITH (
   'fields.order_id.expression' = '#{number.numberBetween ''0'',''100''}',
   'fields.order_status.expression' = '#{regexify ''(RECEIVED|SHIPPED|CANCELLED){1}''}'
 );
+
+SELECT * FROM orders;
 ```
 
 ## License 
