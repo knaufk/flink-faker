@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import org.apache.flink.table.data.DecimalData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.data.TimestampData;
@@ -13,7 +14,8 @@ public class FakerUtils {
 
   public static final String FAKER_DATETIME_FORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
 
-  private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FAKER_DATETIME_FORMAT);;
+  private static DateTimeFormatter formatter =
+      DateTimeFormatter.ofPattern(FAKER_DATETIME_FORMAT, new Locale("us"));
 
   static Object stringValueToType(String value, LogicalTypeRoot logicalType) {
 
