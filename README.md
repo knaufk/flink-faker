@@ -145,3 +145,6 @@ SELECT * FROM orders;
 Copyright © 2020 Konstantin Knauf
 
 Distributed under Apache License, Version 2.0.
+
+
+/polls Option1 'Option 2' "Option 3"
