@@ -36,6 +36,7 @@ CREATE TEMPORARY TABLE heros (
   'connector' = 'faker', 
   'fields.name.expression' = '#{superhero.name}',
   'fields.power.expression' = '#{superhero.power}',
+  'fields.power.null-rate' = '0.05',
   'fields.age.expression' = '#{number.numberBetween ''0'',''1000''}'
 );
 
@@ -97,6 +98,7 @@ Connector Option | Default | Description
 `number-of-rows` | None    | The number of rows to produce. If this is options is set, the source is bounded otherwise it is unbounded and runs indefinitely.
 `rows-per-second`| 10000   | The maximum rate at which the source produces records.
 `fields.<field>.expression` | None | The [Java Faker](https://github.com/DiUS/java-faker) expression to generate the values for this field.
+`fields.<field>.null-rate` | 0.0 | Fraction of rows for which this field is `null`
 
 ### On Timestamps
 
