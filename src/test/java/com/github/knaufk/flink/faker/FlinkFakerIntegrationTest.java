@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 public class FlinkFakerIntegrationTest {
 
-  public static final int NUM_ROWS = 5;
+  public static final int NUM_ROWS = 10;
 
   @Test
   public void testFlinkFakerWithLimitedNumberOfRows() {
@@ -28,6 +28,7 @@ public class FlinkFakerIntegrationTest {
             + "  'connector' = 'faker', \n"
             + "  'fields.name.expression' = '#{superhero.name}',\n"
             + "  'fields.power.expression' = '#{superhero.power}',\n"
+            + "  'fields.power.null-rate' = '0.5',\n"
             + "  'fields.age.expression' = '#{number.numberBetween ''0'',''1000''}',\n"
             + "  'number-of-rows' = '"
             + NUM_ROWS

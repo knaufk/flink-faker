@@ -3,6 +3,7 @@ package com.github.knaufk.flink.faker;
 import static com.github.knaufk.flink.faker.FlinkFakerTableSourceFactory.UNLIMITED_ROWS;
 
 import com.github.javafaker.Faker;
+import java.util.Random;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
@@ -15,15 +16,22 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
 
   private volatile boolean cancelled;
   private Faker faker;
+  private Random rand;
 
   private String[] fieldExpressions;
+  private Float[] fieldNullRates;
   private LogicalType[] types;
   private long rowsPerSecond;
   private long numberOfRows;
 
   public FlinkFakerSourceFunction(
-      String[] fieldExpressions, LogicalType[] types, long rowsPerSecond, long numberOfRows) {
+      String[] fieldExpressions,
+      Float[] fieldNullRates,
+      LogicalType[] types,
+      long rowsPerSecond,
+      long numberOfRows) {
     this.fieldExpressions = fieldExpressions;
+    this.fieldNullRates = fieldNullRates;
     this.types = types;
     this.rowsPerSecond = rowsPerSecond;
     this.numberOfRows = numberOfRows;
@@ -33,6 +41,7 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   public void open(final Configuration parameters) throws Exception {
     super.open(parameters);
     faker = new Faker();
+    rand = new Random();
   }
 
   @Override
@@ -89,8 +98,15 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
     GenericRowData row = new GenericRowData(fieldExpressions.length);
     for (int i = 0; i < fieldExpressions.length; i++) {
       LogicalTypeRoot typeRoot = (types[i]).getTypeRoot();
-      String value = faker.expression(fieldExpressions[i]);
-      row.setField(i, FakerUtils.stringValueToType(value, typeRoot));
+
+      float fieldNullRate = fieldNullRates[i];
+      String value;
+      if (rand.nextFloat() > fieldNullRate) {
+        value = faker.expression(fieldExpressions[i]);
+        row.setField(i, FakerUtils.stringValueToType(value, typeRoot));
+      } else {
+        row.setField(i, null);
+      }
     }
     return row;
   }

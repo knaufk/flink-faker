@@ -37,6 +37,9 @@ class FlinkFakerTableSourceFactoryTest {
           .field("f2", DataTypes.DATE())
           .build();
 
+  private static final TableSchema TINY_SCHEMA =
+      TableSchema.builder().field("f0", DataTypes.TINYINT()).build();
+
   @Test
   public void testSchemaWithNonSupportedTypesIsInvalid() {
 
@@ -67,6 +70,50 @@ class FlinkFakerTableSourceFactoryTest {
               createTableSource(descriptorProperties, INVALID_SCHEMA);
             })
         .withStackTraceContaining("f2 is DATE.");
+  }
+
+  @Test
+  public void testValidNullRateIsValid() {
+    DescriptorProperties descriptorProperties = new DescriptorProperties();
+    descriptorProperties.putString(FactoryUtil.CONNECTOR.key(), "faker");
+    descriptorProperties.putString("fields.f0.expression", "#{number.numberBetween '-128','127'}");
+    descriptorProperties.putString("fields.f0.null-rate", "0.1");
+
+    createTableSource(descriptorProperties, TINY_SCHEMA);
+  }
+
+  @Test
+  public void testNegativeNullRateIsInvalid() {
+
+    assertThatExceptionOfType(ValidationException.class)
+        .isThrownBy(
+            () -> {
+              DescriptorProperties descriptorProperties = new DescriptorProperties();
+              descriptorProperties.putString(FactoryUtil.CONNECTOR.key(), "faker");
+              descriptorProperties.putString(
+                  "fields.f0.expression", "#{number.numberBetween '-128','127'}");
+              descriptorProperties.putString("fields.f0.null-rate", "-0.8");
+
+              createTableSource(descriptorProperties, TINY_SCHEMA);
+            })
+        .withStackTraceContaining("needs to be in [0,1]");
+  }
+
+  @Test
+  public void testNullRateGreaterOneIsInvalid() {
+
+    assertThatExceptionOfType(ValidationException.class)
+        .isThrownBy(
+            () -> {
+              DescriptorProperties descriptorProperties = new DescriptorProperties();
+              descriptorProperties.putString(FactoryUtil.CONNECTOR.key(), "faker");
+              descriptorProperties.putString(
+                  "fields.f0.expression", "#{number.numberBetween '-128','127'}");
+              descriptorProperties.putString("fields.f0.null-rate", "1.01");
+
+              createTableSource(descriptorProperties, TINY_SCHEMA);
+            })
+        .withStackTraceContaining("needs to be in [0,1]");
   }
 
   @Test

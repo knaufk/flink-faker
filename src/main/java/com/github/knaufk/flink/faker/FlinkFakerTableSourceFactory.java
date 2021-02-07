@@ -23,6 +23,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
   public static final String FIELDS = "fields";
   public static final String EXPRESSION = "expression";
+  public static final String NULL_RATE = "null-rate";
 
   public static final Long ROWS_PER_SECOND_DEFAULT_VALUE = 10000L;
   public static final Long UNLIMITED_ROWS = -1L;
@@ -66,43 +67,72 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     context.getCatalogTable().getOptions().forEach(options::setString);
 
     TableSchema schema = TableSchemaUtils.getPhysicalSchema(catalogTable.getSchema());
+    Float[] fieldNullRates = new Float[schema.getFieldCount()];
     String[] fieldExpressions = new String[schema.getFieldCount()];
 
     for (int i = 0; i < fieldExpressions.length; i++) {
-      DataType dataType = schema.getFieldDataType(i).get();
       String fieldName = schema.getFieldName(i).get();
-      if (!SUPPORTED_ROOT_TYPES.contains(dataType.getLogicalType().getTypeRoot())) {
-        throw new ValidationException(
-            "Only "
-                + SUPPORTED_ROOT_TYPES
-                + " columns are supported by Faker TableSource. "
-                + fieldName
-                + " is "
-                + dataType.getLogicalType().getTypeRoot()
-                + ".");
-      }
+      DataType dataType = schema.getFieldDataType(i).get();
+      validateDataType(fieldName, dataType);
 
-      ConfigOption<String> expression =
-          key(FIELDS + "." + fieldName + "." + EXPRESSION).stringType().noDefaultValue();
-
-      String fieldExpression = options.get(expression);
-      if (fieldExpression == null) {
-        throw new ValidationException(
-            "Every column needs a corresponding expression. No expression found for "
-                + fieldName
-                + ".");
-      }
-
-      try {
-        faker.expression(fieldExpression);
-      } catch (RuntimeException e) {
-        throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
-      }
-
-      fieldExpressions[i] = fieldExpression;
+      fieldExpressions[i] = readAndValidateFieldExpression(options, fieldName);
+      ;
+      fieldNullRates[i] = readAndValidateNullRate(options, fieldName);
+      ;
     }
     return new FlinkFakerTableSource(
-        fieldExpressions, schema, options.get(ROWS_PER_SECOND), options.get(NUMBER_OF_ROWS));
+        fieldExpressions,
+        fieldNullRates,
+        schema,
+        options.get(ROWS_PER_SECOND),
+        options.get(NUMBER_OF_ROWS));
+  }
+
+  private Float readAndValidateNullRate(Configuration options, String fieldName) {
+    ConfigOption<Float> nullRate =
+        key(FIELDS + "." + fieldName + "." + NULL_RATE).floatType().defaultValue(0.0f);
+
+    Float fieldNullRate = options.get(nullRate);
+
+    if (fieldNullRate > 1.0f || fieldNullRate < 0.0f) {
+      throw new ValidationException(
+          "Null rate needs to be in [0,1]. Null rate of " + fieldName + " is " + fieldNullRate);
+    }
+    return fieldNullRate;
+  }
+
+  private String readAndValidateFieldExpression(Configuration options, String fieldName) {
+    ConfigOption<String> expression =
+        key(FIELDS + "." + fieldName + "." + EXPRESSION).stringType().noDefaultValue();
+
+    String fieldExpression = options.get(expression);
+    if (fieldExpression == null) {
+      throw new ValidationException(
+          "Every column needs a corresponding expression. No expression found for "
+              + fieldName
+              + ".");
+    }
+
+    try {
+      Faker faker = new Faker();
+      faker.expression(fieldExpression);
+    } catch (RuntimeException e) {
+      throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
+    }
+    return fieldExpression;
+  }
+
+  private void validateDataType(String fieldName, DataType dataType) {
+    if (!SUPPORTED_ROOT_TYPES.contains(dataType.getLogicalType().getTypeRoot())) {
+      throw new ValidationException(
+          "Only "
+              + SUPPORTED_ROOT_TYPES
+              + " columns are supported by Faker TableSource. "
+              + fieldName
+              + " is "
+              + dataType.getLogicalType().getTypeRoot()
+              + ".");
+    }
   }
 
   @Override

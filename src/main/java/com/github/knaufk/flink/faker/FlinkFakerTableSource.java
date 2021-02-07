@@ -12,14 +12,20 @@ import org.apache.flink.table.types.logical.LogicalType;
 public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource {
 
   private String[] fieldExpressions;
+  private Float[] fieldNullRates;
   private TableSchema schema;
   private final LogicalType[] types;
   private long rowsPerSecond;
   private long numberOfRows;
 
   public FlinkFakerTableSource(
-      String[] fieldExpressions, TableSchema schema, long rowsPerSecond, long numberOfRows) {
+      String[] fieldExpressions,
+      Float[] fieldNullRates,
+      TableSchema schema,
+      long rowsPerSecond,
+      long numberOfRows) {
     this.fieldExpressions = fieldExpressions;
+    this.fieldNullRates = fieldNullRates;
     this.schema = schema;
     types =
         Arrays.stream(schema.getFieldDataTypes())
@@ -38,13 +44,15 @@ public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource
   public ScanRuntimeProvider getScanRuntimeProvider(final ScanContext scanContext) {
     boolean isBounded = numberOfRows != UNLIMITED_ROWS;
     return SourceFunctionProvider.of(
-        new FlinkFakerSourceFunction(fieldExpressions, types, rowsPerSecond, numberOfRows),
+        new FlinkFakerSourceFunction(
+            fieldExpressions, fieldNullRates, types, rowsPerSecond, numberOfRows),
         isBounded);
   }
 
   @Override
   public DynamicTableSource copy() {
-    return new FlinkFakerTableSource(fieldExpressions, schema, rowsPerSecond, numberOfRows);
+    return new FlinkFakerTableSource(
+        fieldExpressions, fieldNullRates, schema, rowsPerSecond, numberOfRows);
   }
 
   @Override
