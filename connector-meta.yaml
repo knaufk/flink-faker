@@ -19,4 +19,7 @@ connector:
     - key: fields.<fieldname>.expression
       required: true
       description: Java Faker expression for this field
-
+    - key: fields.<fieldname>.null-rate
+      required: false
+      description: Java Faker expression for this field
+      defaultValue: Fraction of rows for which this field is `null`
