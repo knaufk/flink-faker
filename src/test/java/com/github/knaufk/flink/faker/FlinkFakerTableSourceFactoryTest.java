@@ -200,6 +200,6 @@ class FlinkFakerTableSourceFactoryTest {
         ObjectIdentifier.of("", "", ""),
         new CatalogTableImpl(invalidSchema, descriptorProperties.asMap(), ""),
         new Configuration(),
-        Thread.currentThread().getContextClassLoader());
+        Thread.currentThread().getContextClassLoader(), false);
   }
 }
