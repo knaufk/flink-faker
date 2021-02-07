@@ -100,9 +100,8 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
       LogicalTypeRoot typeRoot = (types[i]).getTypeRoot();
 
       float fieldNullRate = fieldNullRates[i];
-      String value;
       if (rand.nextFloat() > fieldNullRate) {
-        value = faker.expression(fieldExpressions[i]);
+        String value = faker.expression(fieldExpressions[i]);
         row.setField(i, FakerUtils.stringValueToType(value, typeRoot));
       } else {
         row.setField(i, null);

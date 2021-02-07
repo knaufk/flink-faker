@@ -63,6 +63,6 @@ public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource
   @Override
   public LookupRuntimeProvider getLookupRuntimeProvider(LookupContext context) {
     return TableFunctionProvider.of(
-        new FlinkFakerLookupFunction(fieldExpressions, types, context.getKeys()));
+        new FlinkFakerLookupFunction(fieldExpressions, fieldNullRates, types, context.getKeys()));
   }
 }

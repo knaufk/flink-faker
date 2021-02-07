@@ -1,5 +1,6 @@
 package com.github.knaufk.flink.faker;
 
+import static com.github.knaufk.flink.faker.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -16,39 +17,11 @@ class FlinkFakerLookupFunctionTest {
 
     ListOutputCollector collector = new ListOutputCollector();
 
-    LogicalType[] types = {
-      new TinyIntType(),
-      new SmallIntType(),
-      new IntType(),
-      new BigIntType(),
-      new DoubleType(),
-      new FloatType(),
-      new DecimalType(6, 2),
-      new CharType(10),
-      new VarCharType(255),
-      new VarCharType(Integer.MAX_VALUE),
-      new BooleanType()
-    };
-
-    String[] fieldExpressions =
-        new String[] {
-          "#{number.numberBetween '-128','127'}",
-          "#{number.numberBetween '-32768','32767'}",
-          "#{number.numberBetween '-2147483648','2147483647'}",
-          "#{number.randomNumber '12','false'}",
-          "#{number.randomDouble '3','-1000','1000'}",
-          "#{number.randomDouble '3','-1000','1000'}",
-          "#{number.randomDouble '3','-1000','1000'}",
-          "#{Lorem.characters '10'}",
-          "#{Lorem.characters '255'}",
-          "#{Lorem.sentence}",
-          "#{regexify '(true|false){1}'}",
-        };
-
     int[][] keys = {{1, 0}, {2, 0}};
 
     FlinkFakerLookupFunction flinkFakerLookupFunction =
-        new FlinkFakerLookupFunction(fieldExpressions, types, keys);
+        new FlinkFakerLookupFunction(
+            EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES, neverNull(12), ALL_SUPPORTED_DATA_TYPES, keys);
 
     flinkFakerLookupFunction.setCollector(collector);
     flinkFakerLookupFunction.open(null);
@@ -59,8 +32,39 @@ class FlinkFakerLookupFunctionTest {
     assertThat(rowData.getInt(1)).isEqualTo(10);
     assertThat(rowData.getInt(2)).isEqualTo(11);
 
-    for (int i = 0; i < fieldExpressions.length; i++) {
+    for (int i = 0; i < EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length; i++) {
       assertThat(rowData.isNullAt(i)).isFalse();
+    }
+  }
+
+  @Test
+  public void testLookupWithMultipleKeysButOnlyNullValues() throws Exception {
+
+    ListOutputCollector collector = new ListOutputCollector();
+
+    int[][] keys = {{1, 0}, {2, 0}};
+
+    FlinkFakerLookupFunction flinkFakerLookupFunction =
+        new FlinkFakerLookupFunction(
+            EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+            alwaysNull(12),
+            ALL_SUPPORTED_DATA_TYPES,
+            keys);
+
+    flinkFakerLookupFunction.setCollector(collector);
+    flinkFakerLookupFunction.open(null);
+    flinkFakerLookupFunction.eval(10, 11);
+
+    RowData rowData = collector.getOutputs().get(0);
+
+    assertThat(rowData.getInt(1)).isEqualTo(10);
+    assertThat(rowData.getInt(2)).isEqualTo(11);
+
+    for (int i = 0; i < EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length; i++) {
+      // key fields are not null, they are always equal to the value that was looked up
+      if (i != 1 && i != 2) {
+        assertThat(rowData.isNullAt(i)).isTrue();
+      }
     }
   }
 
