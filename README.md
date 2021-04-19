@@ -16,13 +16,6 @@ This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble
 mvn clean package
 ```
 
-## Package for Ververica Platform
-
-```shell script
-mvn clean package
-docker build . -t vvp-gateway:2.3.3-faker-0.2.0
-```
-
 ## Usage
 
 ### As ScanTableSource
