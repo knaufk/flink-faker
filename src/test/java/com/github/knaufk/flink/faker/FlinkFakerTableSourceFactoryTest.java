@@ -201,10 +201,11 @@ class FlinkFakerTableSourceFactoryTest {
       DescriptorProperties descriptorProperties, final TableSchema invalidSchema) {
 
     EnvironmentSettings settings =
-    EnvironmentSettings.newInstance().inStreamingMode().useBlinkPlanner().build();
+        EnvironmentSettings.newInstance().inStreamingMode().useBlinkPlanner().build();
     TableEnvironment tableEnv = TableEnvironment.create(settings);
     TableEnvironmentInternal tableEnvInternal = (TableEnvironmentInternal) tableEnv;
-    CatalogTable catalogTable = new CatalogTableImpl(invalidSchema, descriptorProperties.asMap(), "");
+    CatalogTable catalogTable =
+        new CatalogTableImpl(invalidSchema, descriptorProperties.asMap(), "");
 
     return FactoryUtil.createTableSource(
         null,
