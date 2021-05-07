@@ -4,8 +4,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.ValidationException;
+import org.apache.flink.table.api.internal.TableEnvironmentInternal;
+import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.catalog.CatalogTableImpl;
 import org.apache.flink.table.catalog.ObjectIdentifier;
 import org.apache.flink.table.connector.source.DynamicTableSource;
@@ -195,10 +199,18 @@ class FlinkFakerTableSourceFactoryTest {
 
   private DynamicTableSource createTableSource(
       DescriptorProperties descriptorProperties, final TableSchema invalidSchema) {
+
+    EnvironmentSettings settings =
+        EnvironmentSettings.newInstance().inStreamingMode().useBlinkPlanner().build();
+    TableEnvironment tableEnv = TableEnvironment.create(settings);
+    TableEnvironmentInternal tableEnvInternal = (TableEnvironmentInternal) tableEnv;
+    CatalogTable catalogTable =
+        new CatalogTableImpl(invalidSchema, descriptorProperties.asMap(), "");
+
     return FactoryUtil.createTableSource(
         null,
         ObjectIdentifier.of("", "", ""),
-        new CatalogTableImpl(invalidSchema, descriptorProperties.asMap(), ""),
+        tableEnvInternal.getCatalogManager().resolveCatalogTable(catalogTable),
         new Configuration(),
         Thread.currentThread().getContextClassLoader(),
         false);
