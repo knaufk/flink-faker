@@ -21,7 +21,8 @@ mvn clean package
 1. Download Flink from the [Apache Flink website](https://flink.apache.org/downloads.html).
 2. Download the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases) page (or [build it yourself](#package)).
 3. Put the downloaded jars under `FLINK_HOME/lib/`.
-4. (Re)Start the [Flink CLI](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/table/sqlclient/).
+4. (Re)Start a [Flink cluster](https://ci.apache.org/projects/flink/flink-docs-stable/docs/try-flink/local_installation/#step-2-start-a-cluster).
+5. (Re)Start the [Flink CLI](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/table/sqlclient/).
 
 ## Adding flink-faker to Ververica Platform
 
