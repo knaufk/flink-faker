@@ -16,6 +16,20 @@ This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble
 mvn clean package
 ```
 
+## Adding flink-faker to Flink SQL Client
+
+1. Download Flink from the [Apache Flink website](https://flink.apache.org/downloads.html).
+2. Download the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases) page (or [build it yourself](#package)).
+3. Put the downloaded jars under `FLINK_HOME/lib/`.
+4. (Re)Start the [Flink CLI](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/table/sqlclient/).
+
+## Adding flink-faker to Ververica Platform
+
+1. [Setup Ververica Platform](https://docs.ververica.com/getting_started/installation.html).
+2. Download the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases) page (or [build it yourself](#package)).
+3. Start Ververica Platorm > SQL > Connectors > Create Connector. Select the downloaded JAR and finish the setup.  
+![Howto add flink-faker to Ververica Platform](add-faker-connector.gif)
+
 ## Usage
 
 ### As ScanTableSource
@@ -137,6 +151,6 @@ SELECT * FROM orders;
 
 ## License 
 
-Copyright © 2020 Konstantin Knauf
+Copyright © 2020-2021 Konstantin Knauf
 
 Distributed under Apache License, Version 2.0.
