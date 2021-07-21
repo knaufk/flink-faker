@@ -27,8 +27,8 @@ mvn clean package
 ## Adding flink-faker to Ververica Platform
 
 1. [Setup Ververica Platform](https://docs.ververica.com/getting_started/installation.html).
-2. Download the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases) page (or [build it yourself](#package)).
-3. Start Ververica Platorm > SQL > Connectors > Create Connector. Select the downloaded JAR and finish the setup.  
+2. Get the link to the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases).
+3. Start Ververica Platorm > SQL > Connectors > Create Connector, provide the external URL from step 2 and finish the setup.  
    ![Howto add flink-faker to Ververica Platform](add-faker-connector.gif)
 
 ## Usage
