@@ -2,19 +2,34 @@
 
 # flink-faker
 
-flink-faker is an Apache Flink [table source](https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/table/connectors/) 
-that generates fake data based on the [Java Faker](https://github.com/DiUS/java-faker) expression 
+flink-faker is an Apache Flink [table source](https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/table/connectors/)
+that generates fake data based on the [Java Faker](https://github.com/DiUS/java-faker) expression
 provided for each column.
 
-Checkout this [demo web application](https://java-faker.herokuapp.com/) for some example Java Faker expressions.   
+Checkout this [demo web application](https://java-faker.herokuapp.com/) for some example Java Faker expressions.
 
-This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble). 
+This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble).
 
 ## Package
 
 ```shell script
 mvn clean package
 ```
+
+## Adding flink-faker to Flink SQL Client
+
+1. Download Flink from the [Apache Flink website](https://flink.apache.org/downloads.html).
+2. Download the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases) page (or [build it yourself](#package)).
+3. Put the downloaded jars under `FLINK_HOME/lib/`.
+4. (Re)Start a [Flink cluster](https://ci.apache.org/projects/flink/flink-docs-stable/docs/try-flink/local_installation/#step-2-start-a-cluster).
+5. (Re)Start the [Flink CLI](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/table/sqlclient/).
+
+## Adding flink-faker to Ververica Platform
+
+1. [Setup Ververica Platform](https://docs.ververica.com/getting_started/installation.html).
+2. Get the link to the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases).
+3. Start Ververica Platorm > SQL > Connectors > Create Connector, provide the external URL from step 2 and finish the setup.  
+   ![Howto add flink-faker to Ververica Platform](add-faker-connector.gif)
 
 ## Usage
 
@@ -71,7 +86,7 @@ ON l.character_id = c.character_id;
 
 Currently, the `faker` source supports the following data types:
 
-* `CHAR` 
+* `CHAR`
 * `VARCHAR`
 * `STRING`
 * `TINYINT`
@@ -95,8 +110,8 @@ Connector Option | Default | Description
 
 ### On Timestamps
 
-For rows of type `TIMESTAMP`, the corresponding Java Faker expression needs to return a timestamp formatted as `EEE MMM dd HH:mm:ss zzz yyyy`. 
-Typically, you would use one of the following expressions: 
+For rows of type `TIMESTAMP`, the corresponding Java Faker expression needs to return a timestamp formatted as `EEE MMM dd HH:mm:ss zzz yyyy`.
+Typically, you would use one of the following expressions:
 
 ```
 CREATE TEMPORARY TABLE timestamp_example (
@@ -112,14 +127,14 @@ WITH (
 SELECT * FROM timestamp_example;
 ```
 
-For `timestamp1` Java Faker will generate a random timestamp that lies at most 15 seconds in the past. 
-For `timestamp2` Java Faker will generate a random timestamp, that lies at most 15 seconds in the past, but at least 5 seconds. 
+For `timestamp1` Java Faker will generate a random timestamp that lies at most 15 seconds in the past.
+For `timestamp2` Java Faker will generate a random timestamp, that lies at most 15 seconds in the past, but at least 5 seconds.
 
 ### "One Of" Columns
 
 The Java Faker expression to pick a random value from a list of options is not straight forward to get right.
-Actually, I did not manage to get ``Options.option`` work at all. 
-As a workaround, I recommend using ``regexify`` for this use case. 
+Actually, I did not manage to get ``Options.option`` work at all.
+As a workaround, I recommend using ``regexify`` for this use case.
 
 ```sql
 CREATE TEMPORARY TABLE orders (
@@ -135,8 +150,8 @@ WITH (
 SELECT * FROM orders;
 ```
 
-## License 
+## License
 
-Copyright © 2020 Konstantin Knauf
+Copyright © 2020-2021 Konstantin Knauf
 
 Distributed under Apache License, Version 2.0.
