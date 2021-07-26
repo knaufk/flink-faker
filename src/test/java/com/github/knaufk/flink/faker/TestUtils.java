@@ -1,5 +1,7 @@
 package com.github.knaufk.flink.faker;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.flink.table.types.logical.*;
 
 public class TestUtils {
@@ -17,7 +19,11 @@ public class TestUtils {
         new VarCharType(255),
         new VarCharType(Integer.MAX_VALUE),
         new BooleanType(),
-        new TimestampType()
+        new TimestampType(),
+        new ArrayType(new IntType()),
+        new MapType(new IntType(), new VarCharType()),
+        new RowType(new ArrayList<RowType.RowField>() {}),
+        new MultisetType(new CharType(10))
       };
   public static final String[] EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES =
       new String[] {
@@ -32,7 +38,11 @@ public class TestUtils {
         "#{Lorem.characters '255'}",
         "#{Lorem.sentence}",
         "#{regexify '(true|false){1}'}",
-        "#{date.past '15','5','SECONDS'}"
+        "#{date.past '15','5','SECONDS'}",
+        "#{number.numberBetween '-128','127'}",
+        "#{number.numberBetween '-128','127'}\t#{Lorem.characters '10'}",
+        "",
+        "#{Lorem.characters '10'}"
       };
 
   public static Float[] neverNull(int size) {
@@ -45,9 +55,13 @@ public class TestUtils {
 
   private static Float[] getNullRates(int size, float v) {
     Float[] zeroNullRates = new Float[size];
-    for (int i = 0; i < zeroNullRates.length; i++) {
-      zeroNullRates[i] = v;
-    }
+    Arrays.fill(zeroNullRates, v);
     return zeroNullRates;
+  }
+
+  public static Integer[] getArrayOfOnes(int size) {
+    Integer[] array = new Integer[size];
+    Arrays.fill(array, 1);
+    return array;
   }
 }

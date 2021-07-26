@@ -15,6 +15,7 @@ import org.apache.flink.table.catalog.CatalogTable;
 import org.apache.flink.table.factories.DynamicTableSourceFactory;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
+import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.table.utils.TableSchemaUtils;
 
 public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
@@ -24,6 +25,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
   public static final String FIELDS = "fields";
   public static final String EXPRESSION = "expression";
   public static final String NULL_RATE = "null-rate";
+  public static final String COLLECTION_LENGTH = "length";
 
   public static final Long ROWS_PER_SECOND_DEFAULT_VALUE = 10000L;
   public static final Long UNLIMITED_ROWS = -1L;
@@ -52,9 +54,16 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
           LogicalTypeRoot.CHAR,
           LogicalTypeRoot.VARCHAR,
           LogicalTypeRoot.BOOLEAN,
+          LogicalTypeRoot.ARRAY,
+          LogicalTypeRoot.MAP,
+          LogicalTypeRoot.ROW,
+          LogicalTypeRoot.MULTISET,
           LogicalTypeRoot.TIMESTAMP_WITHOUT_TIME_ZONE,
           LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE,
           LogicalTypeRoot.TIMESTAMP_WITH_TIME_ZONE);
+
+  public static final List<LogicalTypeRoot> COLLECTION_ROOT_TYPES =
+      Arrays.asList(LogicalTypeRoot.ARRAY, LogicalTypeRoot.MAP, LogicalTypeRoot.MULTISET);
 
   @Override
   public FlinkFakerTableSource createDynamicTableSource(final Context context) {
@@ -69,23 +78,50 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     TableSchema schema = TableSchemaUtils.getPhysicalSchema(catalogTable.getSchema());
     Float[] fieldNullRates = new Float[schema.getFieldCount()];
     String[] fieldExpressions = new String[schema.getFieldCount()];
+    Integer[] fieldCollectionLengths = new Integer[schema.getFieldCount()];
 
     for (int i = 0; i < fieldExpressions.length; i++) {
       String fieldName = schema.getFieldName(i).get();
       DataType dataType = schema.getFieldDataType(i).get();
       validateDataType(fieldName, dataType);
 
-      fieldExpressions[i] = readAndValidateFieldExpression(options, fieldName);
-      ;
+      fieldExpressions[i] = readAndValidateFieldExpression(options, fieldName, dataType);
       fieldNullRates[i] = readAndValidateNullRate(options, fieldName);
-      ;
+      fieldCollectionLengths[i] = readAndValidateCollectionLength(options, fieldName, dataType);
     }
     return new FlinkFakerTableSource(
         fieldExpressions,
         fieldNullRates,
+        fieldCollectionLengths,
         schema,
         options.get(ROWS_PER_SECOND),
         options.get(NUMBER_OF_ROWS));
+  }
+
+  private Integer readAndValidateCollectionLength(
+      Configuration options, String fieldName, DataType dataType) {
+    ConfigOption<Integer> collectionLength =
+        key(FIELDS + "." + fieldName + "." + COLLECTION_LENGTH).intType().defaultValue(1);
+    Integer fieldCollectionLength = options.get(collectionLength);
+
+    if (fieldCollectionLength != 1
+        && !COLLECTION_ROOT_TYPES.contains(dataType.getLogicalType().getTypeRoot())) {
+      throw new ValidationException(
+          "Collection length may not be set for  "
+              + fieldName
+              + " with type "
+              + dataType.getLogicalType().getTypeRoot().toString());
+    }
+
+    if (fieldCollectionLength <= 0
+        && COLLECTION_ROOT_TYPES.contains(dataType.getLogicalType().getTypeRoot())) {
+      throw new ValidationException(
+          "Collection length needs to be positive. Collection length of "
+              + fieldName
+              + " is "
+              + fieldCollectionLength);
+    }
+    return fieldCollectionLength;
   }
 
   private Float readAndValidateNullRate(Configuration options, String fieldName) {
@@ -101,11 +137,37 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     return fieldNullRate;
   }
 
-  private String readAndValidateFieldExpression(Configuration options, String fieldName) {
-    ConfigOption<String> expression =
-        key(FIELDS + "." + fieldName + "." + EXPRESSION).stringType().noDefaultValue();
+  private String readAndValidateFieldExpression(
+      Configuration options, String fieldName, DataType dataType) {
+    String fieldExpression;
 
-    String fieldExpression = options.get(expression);
+    if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.MAP) {
+      // expression is given with key and value
+      ConfigOption<String> keyExpression =
+          key(FIELDS + "." + fieldName + ".key." + EXPRESSION).stringType().noDefaultValue();
+      ConfigOption<String> valueExpression =
+          key(FIELDS + "." + fieldName + ".value." + EXPRESSION).stringType().noDefaultValue();
+      fieldExpression = options.get(keyExpression) + "\t" + options.get(valueExpression);
+
+    } else if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.ROW) {
+      StringBuilder stringBuilder = new StringBuilder();
+      List<RowType.RowField> rowFields = ((RowType) dataType.getLogicalType()).getFields();
+      // expression is given element by element
+      for (int i = 0; i < rowFields.size(); i++) {
+        ConfigOption<String> rowExpression =
+            key(FIELDS + "." + fieldName + "." + rowFields.get(i).getName() + "." + EXPRESSION)
+                .stringType()
+                .noDefaultValue();
+        stringBuilder.append(options.get(rowExpression) + "\t");
+      }
+      fieldExpression = stringBuilder.toString();
+
+    } else {
+      fieldExpression =
+          options.get(
+              key(FIELDS + "." + fieldName + "." + EXPRESSION).stringType().noDefaultValue());
+    }
+
     if (fieldExpression == null) {
       throw new ValidationException(
           "Every column needs a corresponding expression. No expression found for "

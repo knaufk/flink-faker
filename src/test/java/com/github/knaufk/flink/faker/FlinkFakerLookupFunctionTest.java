@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.flink.table.data.RowData;
-import org.apache.flink.table.types.logical.*;
 import org.apache.flink.util.Collector;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +20,11 @@ class FlinkFakerLookupFunctionTest {
 
     FlinkFakerLookupFunction flinkFakerLookupFunction =
         new FlinkFakerLookupFunction(
-            EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES, neverNull(12), ALL_SUPPORTED_DATA_TYPES, keys);
+            EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+            neverNull(16),
+            getArrayOfOnes(16),
+            ALL_SUPPORTED_DATA_TYPES,
+            keys);
 
     flinkFakerLookupFunction.setCollector(collector);
     flinkFakerLookupFunction.open(null);
@@ -47,7 +50,8 @@ class FlinkFakerLookupFunctionTest {
     FlinkFakerLookupFunction flinkFakerLookupFunction =
         new FlinkFakerLookupFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            alwaysNull(12),
+            alwaysNull(16),
+            getArrayOfOnes(16),
             ALL_SUPPORTED_DATA_TYPES,
             keys);
 

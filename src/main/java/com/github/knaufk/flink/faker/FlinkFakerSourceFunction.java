@@ -10,7 +10,6 @@ import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunctio
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData> {
 
@@ -20,6 +19,7 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
 
   private String[] fieldExpressions;
   private Float[] fieldNullRates;
+  private Integer[] fieldCollectionLengths;
   private LogicalType[] types;
   private long rowsPerSecond;
   private long numberOfRows;
@@ -27,11 +27,13 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   public FlinkFakerSourceFunction(
       String[] fieldExpressions,
       Float[] fieldNullRates,
+      Integer[] fieldCollectionLengths,
       LogicalType[] types,
       long rowsPerSecond,
       long numberOfRows) {
     this.fieldExpressions = fieldExpressions;
     this.fieldNullRates = fieldNullRates;
+    this.fieldCollectionLengths = fieldCollectionLengths;
     this.types = types;
     this.rowsPerSecond = rowsPerSecond;
     this.numberOfRows = numberOfRows;
@@ -97,12 +99,16 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   RowData generateNextRow() {
     GenericRowData row = new GenericRowData(fieldExpressions.length);
     for (int i = 0; i < fieldExpressions.length; i++) {
-      LogicalTypeRoot typeRoot = (types[i]).getTypeRoot();
 
       float fieldNullRate = fieldNullRates[i];
       if (rand.nextFloat() >= fieldNullRate) {
-        String value = faker.expression(fieldExpressions[i]);
-        row.setField(i, FakerUtils.stringValueToType(value, typeRoot));
+        StringBuilder valuesBuilder = new StringBuilder();
+        for (int j = 0; j < fieldCollectionLengths[i]; j++) {
+          String value = faker.expression(fieldExpressions[i]);
+          valuesBuilder.append(value).append("\n");
+        }
+
+        row.setField(i, FakerUtils.stringValueToType(valuesBuilder.toString(), types[i]));
       } else {
         row.setField(i, null);
       }
