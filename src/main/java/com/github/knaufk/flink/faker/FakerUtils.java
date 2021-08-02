@@ -17,8 +17,7 @@ public class FakerUtils {
   private static DateTimeFormatter formatter =
       DateTimeFormatter.ofPattern(FAKER_DATETIME_FORMAT, new Locale("us"));
 
-  static Object stringValueToType(String values, LogicalType logicalType) {
-    String[] stringArray = values.split("\n");
+  static Object stringValueToType(String[] stringArray, LogicalType logicalType) {
     String value = stringArray.length > 0 ? stringArray[0] : "";
 
     switch (logicalType.getTypeRoot()) {
@@ -57,31 +56,37 @@ public class FakerUtils {
         Object[] array = new Object[stringArray.length];
         for (int i = 0; i < stringArray.length; i++)
           array[i] =
-              (stringValueToType(stringArray[i], ((ArrayType) logicalType).getElementType()));
+              (stringValueToType(
+                  new String[] {stringArray[i]}, ((ArrayType) logicalType).getElementType()));
         return new GenericArrayData(array);
       case MULTISET:
         Map<Object, Integer> multisetMap = new HashMap<>();
         for (int i = 0; i < stringArray.length; i++) {
           Object mapKey =
-              stringValueToType(stringArray[i], ((MultisetType) logicalType).getElementType());
+              stringValueToType(
+                  new String[] {stringArray[i]}, ((MultisetType) logicalType).getElementType());
           Integer mapValue = multisetMap.containsKey(mapKey) ? (multisetMap.get(mapKey) + 1) : 1;
           multisetMap.put(mapKey, mapValue);
         }
         return new GenericMapData(multisetMap);
       case MAP:
         Map<Object, Object> map = new HashMap<>();
-        for (int i = 0; i < stringArray.length; i++) {
-          String[] data = stringArray[i].split("\t");
-          Object key = stringValueToType(data[0], ((MapType) logicalType).getKeyType());
-          Object val = stringValueToType(data[1], ((MapType) logicalType).getValueType());
+        for (int i = 0; i < stringArray.length; i += 2) {
+          Object key =
+              stringValueToType(
+                  new String[] {stringArray[i]}, ((MapType) logicalType).getKeyType());
+          Object val =
+              stringValueToType(
+                  new String[] {stringArray[i + 1]}, ((MapType) logicalType).getValueType());
           map.put(key, val);
         }
         return new GenericMapData(map);
       case ROW:
-        String[] data = value.split("\t");
-        GenericRowData row = new GenericRowData(data.length);
+        GenericRowData row = new GenericRowData(stringArray.length);
         for (int i = 0; i < ((RowType) logicalType).getFieldCount(); i++) {
-          Object obj = stringValueToType(data[i], ((RowType) logicalType).getTypeAt(i));
+          Object obj =
+              stringValueToType(
+                  new String[] {stringArray[i]}, ((RowType) logicalType).getTypeAt(i));
           row.setField(i, obj);
         }
         return row;

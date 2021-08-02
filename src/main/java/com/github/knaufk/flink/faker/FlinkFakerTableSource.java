@@ -11,7 +11,7 @@ import org.apache.flink.table.types.logical.LogicalType;
 
 public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource {
 
-  private String[] fieldExpressions;
+  private String[][] fieldExpressions;
   private Float[] fieldNullRates;
   private Integer[] fieldCollectionLengths;
   private TableSchema schema;
@@ -20,7 +20,7 @@ public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource
   private long numberOfRows;
 
   public FlinkFakerTableSource(
-      String[] fieldExpressions,
+      String[][] fieldExpressions,
       Float[] fieldNullRates,
       Integer[] fieldCollectionLengths,
       TableSchema schema,

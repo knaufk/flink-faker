@@ -25,24 +25,24 @@ public class TestUtils {
         new RowType(new ArrayList<RowType.RowField>() {}),
         new MultisetType(new CharType(10))
       };
-  public static final String[] EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES =
-      new String[] {
-        "#{number.numberBetween '-128','127'}",
-        "#{number.numberBetween '-32768','32767'}",
-        "#{number.numberBetween '-2147483648','2147483647'}",
-        "#{number.randomNumber '12','false'}",
-        "#{number.randomDouble '3','-1000','1000'}",
-        "#{number.randomDouble '3','-1000','1000'}",
-        "#{number.randomDouble '3','-1000','1000'}",
-        "#{Lorem.characters '10'}",
-        "#{Lorem.characters '255'}",
-        "#{Lorem.sentence}",
-        "#{regexify '(true|false){1}'}",
-        "#{date.past '15','5','SECONDS'}",
-        "#{number.numberBetween '-128','127'}",
-        "#{number.numberBetween '-128','127'}\t#{Lorem.characters '10'}",
-        "",
-        "#{Lorem.characters '10'}"
+  public static final String[][] EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES =
+      new String[][] {
+        {"#{number.numberBetween '-128','127'}"},
+        {"#{number.numberBetween '-32768','32767'}"},
+        {"#{number.numberBetween '-2147483648','2147483647'}"},
+        {"#{number.randomNumber '12','false'}"},
+        {"#{number.randomDouble '3','-1000','1000'}"},
+        {"#{number.randomDouble '3','-1000','1000'}"},
+        {"#{number.randomDouble '3','-1000','1000'}"},
+        {"#{Lorem.characters '10'}"},
+        {"#{Lorem.characters '255'}"},
+        {"#{Lorem.sentence}"},
+        {"#{regexify '(true|false){1}'}"},
+        {"#{date.past '15','5','SECONDS'}"},
+        {"#{number.numberBetween '-128','127'}"},
+        {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},
+        {""},
+        {"#{Lorem.characters '10'}"}
       };
 
   public static Float[] neverNull(int size) {

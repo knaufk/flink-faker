@@ -13,7 +13,8 @@ class FlinkFakerSourceFunctionTest {
   @Test
   public void testSimpleExpressions() throws Exception {
 
-    String[] fieldExpressions = new String[] {"#{food.vegetables}", "#{Food.measurement_sizes}"};
+    String[][] fieldExpressions =
+        new String[][] {{"#{food.vegetables}"}, {"#{Food.measurement_sizes}"}};
 
     LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
     FlinkFakerSourceFunction flinkFakerSourceFunction =
@@ -28,9 +29,9 @@ class FlinkFakerSourceFunctionTest {
 
   @Test
   public void testREADME() throws Exception {
-    String[] fieldExpressions =
-        new String[] {
-          "#{superhero.name}", "#{superhero.power}", "#{number.numberBetween '0','1000'}"
+    String[][] fieldExpressions =
+        new String[][] {
+          {"#{superhero.name}"}, {"#{superhero.power}"}, {"#{number.numberBetween '0','1000'}"}
         };
 
     LogicalType[] types = {

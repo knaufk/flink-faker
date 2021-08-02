@@ -77,7 +77,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
     TableSchema schema = TableSchemaUtils.getPhysicalSchema(catalogTable.getSchema());
     Float[] fieldNullRates = new Float[schema.getFieldCount()];
-    String[] fieldExpressions = new String[schema.getFieldCount()];
+    String[][] fieldExpressions = new String[schema.getFieldCount()][];
     Integer[] fieldCollectionLengths = new Integer[schema.getFieldCount()];
 
     for (int i = 0; i < fieldExpressions.length; i++) {
@@ -137,9 +137,9 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     return fieldNullRate;
   }
 
-  private String readAndValidateFieldExpression(
+  private String[] readAndValidateFieldExpression(
       Configuration options, String fieldName, DataType dataType) {
-    String fieldExpression;
+    String[] fieldExpression;
 
     if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.MAP) {
       // expression is given with key and value
@@ -147,28 +147,30 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
           key(FIELDS + "." + fieldName + ".key." + EXPRESSION).stringType().noDefaultValue();
       ConfigOption<String> valueExpression =
           key(FIELDS + "." + fieldName + ".value." + EXPRESSION).stringType().noDefaultValue();
-      fieldExpression = options.get(keyExpression) + "\t" + options.get(valueExpression);
+      fieldExpression = new String[] {options.get(keyExpression), options.get(valueExpression)};
 
     } else if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.ROW) {
       StringBuilder stringBuilder = new StringBuilder();
       List<RowType.RowField> rowFields = ((RowType) dataType.getLogicalType()).getFields();
+      fieldExpression = new String[rowFields.size()];
       // expression is given element by element
       for (int i = 0; i < rowFields.size(); i++) {
         ConfigOption<String> rowExpression =
             key(FIELDS + "." + fieldName + "." + rowFields.get(i).getName() + "." + EXPRESSION)
                 .stringType()
                 .noDefaultValue();
-        stringBuilder.append(options.get(rowExpression) + "\t");
+        fieldExpression[i] = options.get(rowExpression);
       }
-      fieldExpression = stringBuilder.toString();
 
     } else {
       fieldExpression =
-          options.get(
-              key(FIELDS + "." + fieldName + "." + EXPRESSION).stringType().noDefaultValue());
+          new String[] {
+            options.get(
+                key(FIELDS + "." + fieldName + "." + EXPRESSION).stringType().noDefaultValue())
+          };
     }
 
-    if (fieldExpression == null) {
+    if (Arrays.asList(fieldExpression).contains(null)) {
       throw new ValidationException(
           "Every column needs a corresponding expression. No expression found for "
               + fieldName
@@ -177,7 +179,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
     try {
       Faker faker = new Faker();
-      faker.expression(fieldExpression);
+      for (String expression : fieldExpression) faker.expression(expression);
     } catch (RuntimeException e) {
       throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
     }
