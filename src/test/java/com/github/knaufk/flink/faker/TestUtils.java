@@ -1,6 +1,5 @@
 package com.github.knaufk.flink.faker;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.flink.table.types.logical.*;
 
@@ -22,7 +21,10 @@ public class TestUtils {
         new TimestampType(),
         new ArrayType(new IntType()),
         new MapType(new IntType(), new VarCharType()),
-        new RowType(new ArrayList<RowType.RowField>() {}),
+        new RowType(
+            Arrays.asList(
+                new RowType.RowField("age", new IntType()),
+                new RowType.RowField("name", new CharType(10)))),
         new MultisetType(new CharType(10))
       };
   public static final String[][] EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES =
@@ -41,7 +43,7 @@ public class TestUtils {
         {"#{date.past '15','5','SECONDS'}"},
         {"#{number.numberBetween '-128','127'}"},
         {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},
-        {""},
+        {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},
         {"#{Lorem.characters '10'}"}
       };
 

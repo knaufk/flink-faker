@@ -53,20 +53,21 @@ public class FakerUtils {
         //      case INTERVAL_DAY_TIME:
         //        break;
       case ARRAY:
-        Object[] array = new Object[stringArray.length];
+        Object[] arrayElements = new Object[stringArray.length];
         for (int i = 0; i < stringArray.length; i++)
-          array[i] =
+          arrayElements[i] =
               (stringValueToType(
                   new String[] {stringArray[i]}, ((ArrayType) logicalType).getElementType()));
-        return new GenericArrayData(array);
+        return new GenericArrayData(arrayElements);
       case MULTISET:
         Map<Object, Integer> multisetMap = new HashMap<>();
         for (int i = 0; i < stringArray.length; i++) {
-          Object mapKey =
+          Object element =
               stringValueToType(
                   new String[] {stringArray[i]}, ((MultisetType) logicalType).getElementType());
-          Integer mapValue = multisetMap.containsKey(mapKey) ? (multisetMap.get(mapKey) + 1) : 1;
-          multisetMap.put(mapKey, mapValue);
+          Integer multiplicity =
+              multisetMap.containsKey(element) ? (multisetMap.get(element) + 1) : 1;
+          multisetMap.put(element, multiplicity);
         }
         return new GenericMapData(multisetMap);
       case MAP:
