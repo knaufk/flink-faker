@@ -13,11 +13,13 @@ class FlinkFakerSourceFunctionTest {
   @Test
   public void testSimpleExpressions() throws Exception {
 
-    String[] fieldExpressions = new String[] {"#{food.vegetables}", "#{Food.measurement_sizes}"};
+    String[][] fieldExpressions =
+        new String[][] {{"#{food.vegetables}"}, {"#{Food.measurement_sizes}"}};
 
     LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, neverNull(2), types, 100, 10);
+        new FlinkFakerSourceFunction(
+            fieldExpressions, neverNull(2), getArrayOfOnes(2), types, 100, 10);
     flinkFakerSourceFunction.open(new Configuration());
 
     assertThat(flinkFakerSourceFunction.generateNextRow().getArity()).isEqualTo(2);
@@ -27,16 +29,17 @@ class FlinkFakerSourceFunctionTest {
 
   @Test
   public void testREADME() throws Exception {
-    String[] fieldExpressions =
-        new String[] {
-          "#{superhero.name}", "#{superhero.power}", "#{number.numberBetween '0','1000'}"
+    String[][] fieldExpressions =
+        new String[][] {
+          {"#{superhero.name}"}, {"#{superhero.power}"}, {"#{number.numberBetween '0','1000'}"}
         };
 
     LogicalType[] types = {
       new VarCharType(Integer.MAX_VALUE), new VarCharType(Integer.MAX_VALUE), new IntType()
     };
     FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(fieldExpressions, neverNull(3), types, 100, 10);
+        new FlinkFakerSourceFunction(
+            fieldExpressions, neverNull(3), getArrayOfOnes(3), types, 100, 10);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -52,14 +55,15 @@ class FlinkFakerSourceFunctionTest {
     FlinkFakerSourceFunction flinkFakerSourceFunction =
         new FlinkFakerSourceFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            neverNull(12),
+            neverNull(16),
+            getArrayOfOnes(16),
             ALL_SUPPORTED_DATA_TYPES,
             100,
             10);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
-    assertThat(rowData.getArity()).isEqualTo(12);
+    assertThat(rowData.getArity()).isEqualTo(16);
     for (int i = 0; i < EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length; i++) {
       assertThat(rowData.isNullAt(i)).isFalse();
     }
@@ -71,14 +75,15 @@ class FlinkFakerSourceFunctionTest {
     FlinkFakerSourceFunction flinkFakerSourceFunction =
         new FlinkFakerSourceFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            alwaysNull(12),
+            alwaysNull(16),
+            getArrayOfOnes(16),
             ALL_SUPPORTED_DATA_TYPES,
             100,
             10);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
-    assertThat(rowData.getArity()).isEqualTo(12);
+    assertThat(rowData.getArity()).isEqualTo(16);
     for (int i = 0; i < EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length; i++) {
       assertThat(rowData.isNullAt(i)).isTrue();
     }

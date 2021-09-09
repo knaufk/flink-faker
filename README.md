@@ -51,6 +51,7 @@ CREATE TEMPORARY TABLE heros (
 SELECT * FROM heros;
 ```
 
+
 ### As LookupTableSource
 
 ```sql
@@ -98,6 +99,10 @@ Currently, the `faker` source supports the following data types:
 * `DECIMAL`
 * `BOOLEAN`
 * `TIMESTAMP`
+* `ARRAY`
+* `MAP`
+* `MULTISET`
+* `ROW`
 
 ### Connector Options
 
@@ -107,13 +112,14 @@ Connector Option | Default | Description
 `rows-per-second`| 10000   | The maximum rate at which the source produces records.
 `fields.<field>.expression` | None | The [Java Faker](https://github.com/DiUS/java-faker) expression to generate the values for this field.
 `fields.<field>.null-rate` | 0.0 | Fraction of rows for which this field is `null`
+`fields.<field>.length`| 1 | Size of array, map or multiset
 
 ### On Timestamps
 
 For rows of type `TIMESTAMP`, the corresponding Java Faker expression needs to return a timestamp formatted as `EEE MMM dd HH:mm:ss zzz yyyy`.
 Typically, you would use one of the following expressions:
 
-```
+```sql
 CREATE TEMPORARY TABLE timestamp_example (
   `timestamp1` TIMESTAMP(3),
   `timestamp2` TIMESTAMP(3)
@@ -129,6 +135,32 @@ SELECT * FROM timestamp_example;
 
 For `timestamp1` Java Faker will generate a random timestamp that lies at most 15 seconds in the past.
 For `timestamp2` Java Faker will generate a random timestamp, that lies at most 15 seconds in the past, but at least 5 seconds.
+
+### On Collection Data Types
+
+The usage of `ARRAY`, `MULTISET`, `MAP` and `ROW` types is shown in the following example.
+
+```sql
+CREATE TEMPORARY TABLE hp (
+  `character-with-age` MAP<STRING,INT>,
+  `spells` MULTISET<STRING>,
+  `locations` ARRAY<STRING>,
+  `house-points` ROW<`house` STRING, `points` INT>
+) WITH (
+  'connector' = 'faker',
+  'fields.character-with-age.key.expression' = '#{harry_potter.character}',
+  'fields.character-with-age.value.expression' = '#{number.numberBetween ''10'',''100''}',
+  'fields.character-with-age.length' = '2',
+  'fields.spells.expression' = '#{harry_potter.spell}',
+  'fields.spells.length' = '5',
+  'fields.locations.expression' = '#{harry_potter.location}',
+  'fields.locations.length' = '3',
+  'fields.house-points.house.expression' = '#{harry_potter.house}',
+  'fields.house-points.points.expression' = '#{number.numberBetween ''10'',''100''}'
+);
+
+SELECT * FROM hp;
+```
 
 ### "One Of" Columns
 

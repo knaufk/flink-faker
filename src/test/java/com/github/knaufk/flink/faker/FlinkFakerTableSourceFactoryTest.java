@@ -32,6 +32,10 @@ class FlinkFakerTableSourceFactoryTest {
           .field("f8", DataTypes.VARCHAR(255))
           .field("f9", DataTypes.STRING())
           .field("f10", DataTypes.BOOLEAN())
+          .field("f11", DataTypes.ARRAY(DataTypes.INT()))
+          .field("f12", DataTypes.MAP(DataTypes.INT(), DataTypes.VARCHAR(255)))
+          .field("f13", DataTypes.ROW(DataTypes.FIELD("age", DataTypes.INT())))
+          .field("f14", DataTypes.MULTISET(DataTypes.CHAR(10)))
           .build();
 
   private static final TableSchema INVALID_SCHEMA =
@@ -173,6 +177,14 @@ class FlinkFakerTableSourceFactoryTest {
     descriptorProperties.putString("fields.f8.expression", "#{Lorem.characters '255'}");
     descriptorProperties.putString("fields.f9.expression", "#{Lorem.sentence}");
     descriptorProperties.putString("fields.f10.expression", "#{regexify '(true|false){1}'}");
+    descriptorProperties.putString(
+        "fields.f11.expression", "#{number.numberBetween '-32768','32767'}");
+    descriptorProperties.putString(
+        "fields.f12.key.expression", "#{number.numberBetween '-32768','32767'}");
+    descriptorProperties.putString("fields.f12.value.expression", "#{Lorem.characters '255'}");
+    descriptorProperties.putString(
+        "fields.f13.age.expression", "#{number.numberBetween '-32768','32767'}");
+    descriptorProperties.putString("fields.f14.expression", "#{Lorem.characters '10'}");
 
     createTableSource(descriptorProperties, VALID_SCHEMA);
   }

@@ -9,12 +9,12 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.functions.FunctionContext;
 import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 public class FlinkFakerLookupFunction extends TableFunction<RowData> {
 
-  private String[] fieldExpressions;
+  private String[][] fieldExpressions;
   private Float[] fieldNullRates;
+  private Integer[] fieldCollectionLengths;
   private LogicalType[] types;
   private int[][] keys;
   private List<Integer> keyIndeces;
@@ -22,9 +22,14 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
   private Random rand;
 
   public FlinkFakerLookupFunction(
-      String[] fieldExpressions, Float[] fieldNullRates, LogicalType[] types, int[][] keys) {
+      String[][] fieldExpressions,
+      Float[] fieldNullRates,
+      Integer[] fieldCollectionLengths,
+      LogicalType[] types,
+      int[][] keys) {
     this.fieldExpressions = fieldExpressions;
     this.fieldNullRates = fieldNullRates;
+    this.fieldCollectionLengths = fieldCollectionLengths;
     this.types = types;
 
     keyIndeces = new ArrayList<>();
@@ -52,10 +57,16 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
         keyCount++;
       } else {
         float fieldNullRate = fieldNullRates[i];
-        LogicalTypeRoot typeRoot = (types[i]).getTypeRoot();
         if (rand.nextFloat() > fieldNullRate) {
-          String value = faker.expression(fieldExpressions[i]);
-          row.setField(i, FakerUtils.stringValueToType(value, typeRoot));
+          List<String> values = new ArrayList<>();
+          for (int j = 0; j < fieldCollectionLengths[i]; j++) {
+            for (int k = 0; k < fieldExpressions[i].length; k++) {
+              // loop for multiple expressions of one field (like map, row fields)
+              values.add(faker.expression(fieldExpressions[i][k]));
+            }
+          }
+          row.setField(
+              i, FakerUtils.stringValueToType(values.toArray(new String[values.size()]), types[i]));
         } else {
           row.setField(i, null);
         }
