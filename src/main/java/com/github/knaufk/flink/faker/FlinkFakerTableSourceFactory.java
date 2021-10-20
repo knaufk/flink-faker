@@ -68,8 +68,6 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
   @Override
   public FlinkFakerTableSource createDynamicTableSource(final Context context) {
 
-    Faker faker = new Faker();
-
     CatalogTable catalogTable = context.getCatalogTable();
 
     Configuration options = new Configuration();
