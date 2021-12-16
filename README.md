@@ -145,7 +145,7 @@ For `timestamp1` Java Faker will generate a random timestamp that lies at most 1
 For `timestamp2` Java Faker will generate a random timestamp, that lies at most 15 seconds in the past, but at least 5 seconds.
 For `timestamp3` Java Faker will generate a random timestamp, that lies at most 15 seconds in the future, but at least 5 seconds.
 For `date1` Java Faker will generate a random birthday between 18 and 65 years ago.
-For `timestamp2` Java Faker will generate a random birthday between 1 and 100 years ago.
+For `date2` Java Faker will generate a random birthday between 1 and 100 years ago.
 
 ### On Collection Data Types
 
