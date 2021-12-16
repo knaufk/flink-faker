@@ -44,7 +44,7 @@ public class FlinkFakerSourceFunction extends RichParallelSourceFunction<RowData
   @Override
   public void open(final Configuration parameters) throws Exception {
     super.open(parameters);
-    faker = new Faker();
+    faker = new FlinkFaker();
     rand = new Random();
   }
 
