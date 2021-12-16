@@ -19,6 +19,7 @@ public class TestUtils {
         new VarCharType(Integer.MAX_VALUE),
         new BooleanType(),
         new TimestampType(),
+        new DateType(),
         new ArrayType(new IntType()),
         new MapType(new IntType(), new VarCharType()),
         new RowType(
@@ -41,6 +42,7 @@ public class TestUtils {
         {"#{Lorem.sentence}"},
         {"#{regexify '(true|false){1}'}"},
         {"#{date.past '15','5','SECONDS'}"},
+        {"#{date.future '2','1','DAYS'}"},
         {"#{number.numberBetween '-128','127'}"},
         {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},
         {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},

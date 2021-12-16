@@ -24,8 +24,9 @@ import org.apache.flink.table.types.logical.RowType;
 
 public class FakerUtils {
 
-  public static final DateTimeFormatter FORMATTER =
+  private static final DateTimeFormatter FORMATTER =
       new DateTimeFormatterBuilder()
+          // Pattern was taken from java.sql.Timestamp#toString
           .appendPattern("uuuu-MM-dd HH:mm:ss")
           .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
           .toFormatter();

@@ -100,6 +100,7 @@ Currently, the `faker` source supports the following data types:
 * `DECIMAL`
 * `BOOLEAN`
 * `TIMESTAMP`
+* `DATE`
 * `ARRAY`
 * `MAP`
 * `MULTISET`
@@ -107,35 +108,44 @@ Currently, the `faker` source supports the following data types:
 
 ### Connector Options
 
-Connector Option | Default | Description
------------------|---------|-------------
-`number-of-rows` | None    | The number of rows to produce. If this is options is set, the source is bounded otherwise it is unbounded and runs indefinitely.
-`rows-per-second`| 10000   | The maximum rate at which the source produces records.
-`fields.<field>.expression` | None | The [Java Faker](https://github.com/DiUS/java-faker) expression to generate the values for this field.
-`fields.<field>.null-rate` | 0.0 | Fraction of rows for which this field is `null`
-`fields.<field>.length`| 1 | Size of array, map or multiset
+| Connector Option            | Default | Description                                                                                                                      |
+|-----------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------|
+| `number-of-rows`            | None    | The number of rows to produce. If this is options is set, the source is bounded otherwise it is unbounded and runs indefinitely. |
+| `rows-per-second`           | 10000   | The maximum rate at which the source produces records.                                                                           |
+| `fields.<field>.expression` | None    | The [Java Faker](https://github.com/DiUS/java-faker) expression to generate the values for this field.                           |
+| `fields.<field>.null-rate`  | 0.0     | Fraction of rows for which this field is `null`                                                                                  |
+| `fields.<field>.length`     | 1       | Size of array, map or multiset                                                                                                   |
 
 ### On Timestamps
 
-For rows of type `TIMESTAMP`, the corresponding Java Faker expression needs to return a timestamp formatted as `EEE MMM dd HH:mm:ss zzz yyyy`.
+For rows of type `TIMESTAMP`, `DATE` the corresponding Java Faker expression needs to return a timestamp formatted as `uuuu-MM-dd hh:mi:ss[.nnnnnnnnn]`.
 Typically, you would use one of the following expressions:
 
 ```sql
-CREATE TEMPORARY TABLE timestamp_example (
+CREATE TEMPORARY TABLE timestamp_and_date_example (
   `timestamp1` TIMESTAMP(3),
-  `timestamp2` TIMESTAMP(3)
+  `timestamp2` TIMESTAMP(3),
+  `timestamp3` TIMESTAMP(3),
+  `date1`      DATE,
+  `date2`      DATE
 )
 WITH (
   'connector' = 'faker', 
   'fields.timestamp1.expression' = '#{date.past ''15'',''SECONDS''}',
-  'fields.timestamp2.expression' = '#{date.past ''15'',''5'',''SECONDS''}'
+  'fields.timestamp2.expression' = '#{date.past ''15'',''5'',''SECONDS''}',
+  'fields.timestamp3.expression' = '#{date.future ''15'',''5'',''SECONDS''}',
+  'fields.date1.expression' = '#{date.birthday}',
+  'fields.date2.expression' = '#{date.birthday ''1'',''100''}'
 );
 
-SELECT * FROM timestamp_example;
+SELECT * FROM timestamp_and_date_example;
 ```
 
 For `timestamp1` Java Faker will generate a random timestamp that lies at most 15 seconds in the past.
 For `timestamp2` Java Faker will generate a random timestamp, that lies at most 15 seconds in the past, but at least 5 seconds.
+For `timestamp3` Java Faker will generate a random timestamp, that lies at most 15 seconds in the future, but at least 5 seconds.
+For `date1` Java Faker will generate a random birthday between 18 and 65 years ago.
+For `timestamp2` Java Faker will generate a random birthday between 1 and 100 years ago.
 
 ### On Collection Data Types
 
