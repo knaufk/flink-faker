@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.flink.table.data.DecimalData;
 import org.apache.flink.table.data.GenericArrayData;
@@ -29,7 +30,7 @@ public class FakerUtils {
           // Pattern was taken from java.sql.Timestamp#toString
           .appendPattern("uuuu-MM-dd HH:mm:ss")
           .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
-          .toFormatter();
+          .toFormatter(Locale.US);
 
   static Object stringValueToType(String[] stringArray, LogicalType logicalType) {
     String value = stringArray.length > 0 ? stringArray[0] : "";
