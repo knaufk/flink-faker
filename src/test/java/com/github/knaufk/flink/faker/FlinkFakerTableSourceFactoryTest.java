@@ -42,7 +42,7 @@ class FlinkFakerTableSourceFactoryTest {
       TableSchema.builder()
           .field("f0", DataTypes.STRING())
           .field("f1", DataTypes.VARCHAR(100))
-          .field("f2", DataTypes.DATE())
+          .field("f2", DataTypes.NULL())
           .build();
 
   private static final TableSchema TINY_SCHEMA =
@@ -77,7 +77,7 @@ class FlinkFakerTableSourceFactoryTest {
                   "fields.f10.expression", "#{regexify '(true|false){1}'}");
               createTableSource(descriptorProperties, INVALID_SCHEMA);
             })
-        .withStackTraceContaining("f2 is DATE.");
+        .withStackTraceContaining("f2 is NULL.");
   }
 
   @Test

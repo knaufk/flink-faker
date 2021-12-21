@@ -21,8 +21,8 @@ class FlinkFakerLookupFunctionTest {
     FlinkFakerLookupFunction flinkFakerLookupFunction =
         new FlinkFakerLookupFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            neverNull(16),
-            getArrayOfOnes(16),
+            neverNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
+            getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,
             keys);
 
@@ -50,8 +50,8 @@ class FlinkFakerLookupFunctionTest {
     FlinkFakerLookupFunction flinkFakerLookupFunction =
         new FlinkFakerLookupFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            alwaysNull(16),
-            getArrayOfOnes(16),
+            alwaysNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
+            getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,
             keys);
 
