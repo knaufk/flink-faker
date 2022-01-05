@@ -8,37 +8,22 @@ import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.functions.FunctionContext;
 import org.apache.flink.table.functions.TableFunction;
-import org.apache.flink.table.types.logical.LogicalType;
 
 public class FlinkFakerLookupFunction extends TableFunction<RowData> {
 
-  private String[][] fieldExpressions;
-  private Float[] fieldNullRates;
-  private Integer[] fieldCollectionLengths;
-  private LogicalType[] types;
-  private int[][] keys;
+  private final FieldInfo[] fieldInfos;
   private List<Integer> keyIndeces;
   private Faker faker;
   private Random rand;
 
-  public FlinkFakerLookupFunction(
-      String[][] fieldExpressions,
-      Float[] fieldNullRates,
-      Integer[] fieldCollectionLengths,
-      LogicalType[] types,
-      int[][] keys) {
-    this.fieldExpressions = fieldExpressions;
-    this.fieldNullRates = fieldNullRates;
-    this.fieldCollectionLengths = fieldCollectionLengths;
-    this.types = types;
+  public FlinkFakerLookupFunction(FieldInfo[] fieldInfos, int[][] keys) {
+    this.fieldInfos = fieldInfos;
 
     keyIndeces = new ArrayList<>();
     for (int i = 0; i < keys.length; i++) {
       // we don't support nested rows for now, so this is actually one-dimensional
       keyIndeces.add(keys[i][0]);
     }
-
-    this.keys = keys;
   }
 
   @Override
@@ -49,27 +34,14 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
   }
 
   public void eval(Object... keys) {
-    GenericRowData row = new GenericRowData(fieldExpressions.length);
+    GenericRowData row = new GenericRowData(fieldInfos.length);
     int keyCount = 0;
-    for (int i = 0; i < fieldExpressions.length; i++) {
+    for (int i = 0; i < fieldInfos.length; i++) {
       if (keyIndeces.contains(i)) {
         row.setField(i, keys[keyCount]);
         keyCount++;
       } else {
-        float fieldNullRate = fieldNullRates[i];
-        if (rand.nextFloat() > fieldNullRate) {
-          List<String> values = new ArrayList<>();
-          for (int j = 0; j < fieldCollectionLengths[i]; j++) {
-            for (int k = 0; k < fieldExpressions[i].length; k++) {
-              // loop for multiple expressions of one field (like map, row fields)
-              values.add(faker.expression(fieldExpressions[i][k]));
-            }
-          }
-          row.setField(
-              i, FakerUtils.stringValueToType(values.toArray(new String[values.size()]), types[i]));
-        } else {
-          row.setField(i, null);
-        }
+        row.setField(i, FakerUtils.stringValueToType(fieldInfos[i], f -> faker.expression(f)));
       }
     }
     collect(row);

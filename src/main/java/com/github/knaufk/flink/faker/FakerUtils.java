@@ -11,16 +11,15 @@ import java.time.temporal.ChronoField;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import org.apache.flink.table.data.DecimalData;
 import org.apache.flink.table.data.GenericArrayData;
 import org.apache.flink.table.data.GenericMapData;
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.data.TimestampData;
-import org.apache.flink.table.types.logical.ArrayType;
 import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.MapType;
-import org.apache.flink.table.types.logical.MultisetType;
 import org.apache.flink.table.types.logical.RowType;
 
 public class FakerUtils {
@@ -32,9 +31,19 @@ public class FakerUtils {
           .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
           .toFormatter(Locale.US);
 
-  static Object stringValueToType(String[] stringArray, LogicalType logicalType) {
-    String value = stringArray.length > 0 ? stringArray[0] : "";
-
+  static Object stringValueToType(
+      FieldInfo fieldInfo, Function<String, String> fakerExpression2Value) {
+    if (fieldInfo.getNullRate() == 1.0
+        || fieldInfo.getNullRate() > 0
+            && fieldInfo.getNullRate() > ThreadLocalRandom.current().nextFloat()) {
+      return null;
+    }
+    String[] fakerExpressions = fieldInfo.getExpressions();
+    String value =
+        fieldInfo.getNestedFields() == null || fieldInfo.getNestedFields().isEmpty()
+            ? fakerExpression2Value.apply(fakerExpressions[0])
+            : "";
+    LogicalType logicalType = fieldInfo.getLogicalType();
     switch (logicalType.getTypeRoot()) {
       case CHAR:
       case VARCHAR:
@@ -73,18 +82,17 @@ public class FakerUtils {
         //      case INTERVAL_DAY_TIME:
         //        break;
       case ARRAY:
-        Object[] arrayElements = new Object[stringArray.length];
-        for (int i = 0; i < stringArray.length; i++)
+        Object[] arrayElements = new Object[fieldInfo.getLength()];
+        for (int i = 0; i < fieldInfo.getLength(); i++)
           arrayElements[i] =
               (stringValueToType(
-                  new String[] {stringArray[i]}, ((ArrayType) logicalType).getElementType()));
+                  fieldInfo.getNestedFields().get("element"), fakerExpression2Value));
         return new GenericArrayData(arrayElements);
       case MULTISET:
         Map<Object, Integer> multisetMap = new HashMap<>();
-        for (int i = 0; i < stringArray.length; i++) {
+        for (int i = 0; i < fieldInfo.getLength(); i++) {
           Object element =
-              stringValueToType(
-                  new String[] {stringArray[i]}, ((MultisetType) logicalType).getElementType());
+              stringValueToType(fieldInfo.getNestedFields().get("element"), fakerExpression2Value);
           Integer multiplicity =
               multisetMap.containsKey(element) ? (multisetMap.get(element) + 1) : 1;
           multisetMap.put(element, multiplicity);
@@ -92,22 +100,23 @@ public class FakerUtils {
         return new GenericMapData(multisetMap);
       case MAP:
         Map<Object, Object> map = new HashMap<>();
-        for (int i = 0; i < stringArray.length; i += 2) {
+        for (int i = 0; i < fieldInfo.getLength(); i++) {
           Object key =
-              stringValueToType(
-                  new String[] {stringArray[i]}, ((MapType) logicalType).getKeyType());
+              stringValueToType(fieldInfo.getNestedFields().get("key"), fakerExpression2Value);
           Object val =
-              stringValueToType(
-                  new String[] {stringArray[i + 1]}, ((MapType) logicalType).getValueType());
+              stringValueToType(fieldInfo.getNestedFields().get("value"), fakerExpression2Value);
           map.put(key, val);
         }
         return new GenericMapData(map);
       case ROW:
-        GenericRowData row = new GenericRowData(stringArray.length);
+        GenericRowData row = new GenericRowData(((RowType) logicalType).getFieldCount());
         for (int i = 0; i < ((RowType) logicalType).getFieldCount(); i++) {
           Object obj =
               stringValueToType(
-                  new String[] {stringArray[i]}, ((RowType) logicalType).getTypeAt(i));
+                  fieldInfo
+                      .getNestedFields()
+                      .get(((RowType) logicalType).getFieldNames().get(i) + "_" + i),
+                  fakerExpression2Value);
           row.setField(i, obj);
         }
         return row;
