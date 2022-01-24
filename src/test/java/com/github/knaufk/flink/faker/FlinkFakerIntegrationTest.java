@@ -3,11 +3,15 @@ package com.github.knaufk.flink.faker;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
+import org.apache.flink.util.CollectionUtil;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 public class FlinkFakerIntegrationTest {
 
@@ -90,5 +94,28 @@ public class FlinkFakerIntegrationTest {
     }
 
     assertThat(numRows).isEqualTo(3);
+  }
+
+  @Test
+  public void testLimitPushDown() throws Exception {
+    EnvironmentSettings settings = EnvironmentSettings.newInstance().build();
+    TableEnvironment tEnv = TableEnvironment.create(settings);
+
+    tEnv.executeSql("CREATE TEMPORARY TABLE faker_table (\n"
+            + "	f0 INTEGER\n"
+            + ") WITH (\n"
+            + "	'connector' = 'faker',\n"
+            + "	'fields.f0.expression' = '#{number.numberBetween ''10'',''100''}',\n"
+            + " 'number-of-rows' = '100'\n"
+            + ")");
+
+    final Table table = tEnv.sqlQuery("SELECT * FROM faker_table LIMIT 10");
+    String[] explain = table.explain().split("==.*==\\s+");
+    assertThat(explain).hasSize(4);
+    assertThat(explain[2]).contains(
+            "table=[[default_catalog, default_database, faker_table, limit=[10]]], fields=[f0]");
+
+    List<Row> rows = CollectionUtil.iteratorToList(table.execute().collect());
+    assertThat(rows.size()).isEqualTo(5);
   }
 }
