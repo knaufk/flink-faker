@@ -10,7 +10,8 @@ import org.apache.flink.table.connector.source.abilities.SupportsLimitPushDown;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 
-public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource, SupportsLimitPushDown {
+public class FlinkFakerTableSource
+    implements ScanTableSource, LookupTableSource, SupportsLimitPushDown {
 
   private String[][] fieldExpressions;
   private Float[] fieldNullRates;
@@ -83,6 +84,6 @@ public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource
 
   @Override
   public void applyLimit(long limit) {
-     this.numberOfRows = limit;
+    this.numberOfRows = limit;
   }
 }
