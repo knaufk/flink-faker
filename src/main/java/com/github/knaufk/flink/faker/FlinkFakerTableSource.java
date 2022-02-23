@@ -6,10 +6,12 @@ import java.util.Arrays;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.source.*;
+import org.apache.flink.table.connector.source.abilities.SupportsLimitPushDown;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 
-public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource {
+public class FlinkFakerTableSource
+    implements ScanTableSource, LookupTableSource, SupportsLimitPushDown {
 
   private String[][] fieldExpressions;
   private Float[] fieldNullRates;
@@ -78,5 +80,10 @@ public class FlinkFakerTableSource implements ScanTableSource, LookupTableSource
     return TableFunctionProvider.of(
         new FlinkFakerLookupFunction(
             fieldExpressions, fieldNullRates, fieldCollectionLengths, types, context.getKeys()));
+  }
+
+  @Override
+  public void applyLimit(long limit) {
+    this.numberOfRows = limit;
   }
 }
