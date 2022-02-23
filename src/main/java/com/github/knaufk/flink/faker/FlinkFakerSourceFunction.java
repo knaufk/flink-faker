@@ -2,10 +2,10 @@ package com.github.knaufk.flink.faker;
 
 import static com.github.knaufk.flink.faker.FlinkFakerTableSourceFactory.UNLIMITED_ROWS;
 
-import com.github.javafaker.Faker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import net.datafaker.Faker;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;

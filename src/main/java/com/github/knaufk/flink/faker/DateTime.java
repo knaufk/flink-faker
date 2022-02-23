@@ -1,10 +1,10 @@
 package com.github.knaufk.flink.faker;
 
-import com.github.javafaker.DateAndTime;
-import com.github.javafaker.Faker;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import net.datafaker.DateAndTime;
+import net.datafaker.Faker;
 
 public class DateTime extends DateAndTime {
 

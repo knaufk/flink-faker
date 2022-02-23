@@ -1,10 +1,10 @@
 package com.github.knaufk.flink.faker;
 
-import com.github.javafaker.Faker;
-import com.github.javafaker.service.FakeValuesService;
-import com.github.javafaker.service.RandomService;
 import java.util.Locale;
 import java.util.Random;
+import net.datafaker.Faker;
+import net.datafaker.service.FakeValuesService;
+import net.datafaker.service.RandomService;
 
 public class FlinkFaker extends Faker {
   private DateTime dateTime;

@@ -2,11 +2,11 @@ package com.github.knaufk.flink.faker;
 
 import static org.apache.flink.configuration.ConfigOptions.key;
 
-import com.github.javafaker.Faker;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.datafaker.Faker;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.TableSchema;

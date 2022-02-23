@@ -28,11 +28,11 @@
       <version>${flink.version}</version>
       <scope>provided</scope>
   </dependency>
-  <dependency>
-	  <groupId>com.github.javafaker</groupId>
-	  <artifactId>javafaker</artifactId>
-	  <version>1.0.2</version>
-  </dependency>
+    <dependency>
+      <groupId>net.datafaker</groupId>
+      <artifactId>datafaker</artifactId>
+      <version>1.1.0</version>
+    </dependency>
   <dependency>
     <groupId>org.apache.flink</groupId>
     <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
