@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/knaufk/flink-faker.svg?branch=master)](https://travis-ci.com/knaufk/flink-faker)
+![Build Status](https://github.com/knaufk/flink-faker/actions/workflows/ci.yml/badge.svg?branch=master)
 
 # flink-faker
 
