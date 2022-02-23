@@ -9,14 +9,12 @@ import java.util.Set;
 import net.datafaker.Faker;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.ValidationException;
-import org.apache.flink.table.catalog.CatalogTable;
+import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.factories.DynamicTableSourceFactory;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.types.logical.RowType;
-import org.apache.flink.table.utils.TableSchemaUtils;
 
 public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
 
@@ -69,19 +67,18 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
   @Override
   public FlinkFakerTableSource createDynamicTableSource(final Context context) {
 
-    CatalogTable catalogTable = context.getCatalogTable();
-
     Configuration options = new Configuration();
     context.getCatalogTable().getOptions().forEach(options::setString);
 
-    TableSchema schema = TableSchemaUtils.getPhysicalSchema(catalogTable.getSchema());
-    Float[] fieldNullRates = new Float[schema.getFieldCount()];
-    String[][] fieldExpressions = new String[schema.getFieldCount()][];
-    Integer[] fieldCollectionLengths = new Integer[schema.getFieldCount()];
+    ResolvedSchema schema = context.getCatalogTable().getResolvedSchema();
+    int fieldCount = schema.getColumnCount();
+    Float[] fieldNullRates = new Float[fieldCount];
+    String[][] fieldExpressions = new String[fieldCount][];
+    Integer[] fieldCollectionLengths = new Integer[fieldCount];
 
     for (int i = 0; i < fieldExpressions.length; i++) {
-      String fieldName = schema.getFieldName(i).get();
-      DataType dataType = schema.getFieldDataType(i).get();
+      String fieldName = schema.getColumn(i).get().getName();
+      DataType dataType = schema.getColumnDataTypes().get(i);
       validateDataType(fieldName, dataType);
 
       fieldExpressions[i] = readAndValidateFieldExpression(options, fieldName, dataType);
