@@ -8,7 +8,7 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.logical.*;
 import org.junit.jupiter.api.Test;
 
-class FlinkFakerSourceFunctionTest {
+class FlinkFakerGeneratorTest {
 
   @Test
   public void testSimpleExpressions() throws Exception {
@@ -17,9 +17,8 @@ class FlinkFakerSourceFunctionTest {
         new String[][] {{"#{food.vegetables}"}, {"#{Food.measurement_sizes}"}};
 
     LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
-    FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(
-            fieldExpressions, neverNull(2), getArrayOfOnes(2), types, 100, 10);
+    FlinkFakerGenerator flinkFakerSourceFunction =
+        new FlinkFakerGenerator(fieldExpressions, neverNull(2), getArrayOfOnes(2), types, 100);
     flinkFakerSourceFunction.open(new Configuration());
 
     assertThat(flinkFakerSourceFunction.generateNextRow().getArity()).isEqualTo(2);
@@ -37,9 +36,8 @@ class FlinkFakerSourceFunctionTest {
     LogicalType[] types = {
       new VarCharType(Integer.MAX_VALUE), new VarCharType(Integer.MAX_VALUE), new IntType()
     };
-    FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(
-            fieldExpressions, neverNull(3), getArrayOfOnes(3), types, 100, 10);
+    FlinkFakerGenerator flinkFakerSourceFunction =
+        new FlinkFakerGenerator(fieldExpressions, neverNull(3), getArrayOfOnes(3), types, 100);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -52,14 +50,13 @@ class FlinkFakerSourceFunctionTest {
   @Test
   public void testSupportedDataTypes() throws Exception {
 
-    FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(
+    FlinkFakerGenerator flinkFakerSourceFunction =
+        new FlinkFakerGenerator(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
             neverNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,
-            100,
-            10);
+            100);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -72,14 +69,13 @@ class FlinkFakerSourceFunctionTest {
   @Test
   public void testNullsForAllDatatypes() throws Exception {
 
-    FlinkFakerSourceFunction flinkFakerSourceFunction =
-        new FlinkFakerSourceFunction(
+    FlinkFakerGenerator flinkFakerSourceFunction =
+        new FlinkFakerGenerator(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
             alwaysNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,
-            100,
-            10);
+            100);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();

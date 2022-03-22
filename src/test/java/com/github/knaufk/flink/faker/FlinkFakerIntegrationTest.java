@@ -4,9 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.List;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
@@ -16,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 public class FlinkFakerIntegrationTest {
 
-  public static final int NUM_ROWS = 10;
+  public static final int NUM_ROWS = 5;
 
   @Test
   public void testWithComputedColumn() {
@@ -60,8 +58,9 @@ public class FlinkFakerIntegrationTest {
   @Test
   public void testFlinkFakerWithLimitedNumberOfRows() {
 
-    EnvironmentSettings settings = EnvironmentSettings.newInstance().build();
-    TableEnvironment tEnv = TableEnvironment.create(settings);
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(8);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
 
     tEnv.executeSql(
         "CREATE TEMPORARY TABLE heros (\n"
@@ -94,10 +93,10 @@ public class FlinkFakerIntegrationTest {
 
   @Test
   public void testFlinkFakerWithComplexTypes() {
-    // test
 
-    EnvironmentSettings settings = EnvironmentSettings.newInstance().build();
-    TableEnvironment tEnv = TableEnvironment.create(settings);
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(8);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
 
     tEnv.executeSql(
         "CREATE TEMPORARY TABLE hp (\n"
@@ -138,8 +137,10 @@ public class FlinkFakerIntegrationTest {
 
   @Test
   public void testLimitPushDown() throws Exception {
-    EnvironmentSettings settings = EnvironmentSettings.newInstance().build();
-    TableEnvironment tEnv = TableEnvironment.create(settings);
+
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(8);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
 
     tEnv.executeSql(
         "CREATE TEMPORARY TABLE faker_table (\n"
