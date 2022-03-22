@@ -63,7 +63,6 @@ class FlinkFakerSourceFunctionTest {
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
-    System.out.println(rowData);
     assertThat(rowData.getArity()).isEqualTo(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length);
     for (int i = 0; i < EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length; i++) {
       assertThat(rowData.isNullAt(i)).isFalse();

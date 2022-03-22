@@ -3,10 +3,12 @@ package com.github.knaufk.flink.faker;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.List;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
 import org.apache.flink.util.CollectionUtil;
@@ -15,6 +17,45 @@ import org.junit.jupiter.api.Test;
 public class FlinkFakerIntegrationTest {
 
   public static final int NUM_ROWS = 10;
+
+  @Test
+  public void testWithComputedColumn() {
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(8);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+
+    tEnv.executeSql(
+        "CREATE TABLE server_logs ( \n"
+            + "    client_ip STRING,\n"
+            + "    client_identity STRING, \n"
+            + "    userid STRING, \n"
+            + "    log_time AS PROCTIME(),\n"
+            + "    request_line STRING, \n"
+            + "    status_code STRING\n"
+            + ") WITH (\n"
+            + "  'connector' = 'faker', \n"
+            + "  'fields.client_ip.expression' = '#{Internet.publicIpV4Address}',\n"
+            + "  'fields.client_identity.expression' =  '-',\n"
+            + "  'fields.userid.expression' =  '-',\n"
+            + "  'fields.request_line.expression' = '#{regexify ''(GET|POST|PUT|PATCH){1}''} #{regexify ''(/search\\.html|/login\\.html|/prod\\.html|cart\\.html|/order\\.html){1}''} #{regexify ''(HTTP/1\\.1|HTTP/2|/HTTP/1\\.0){1}''}',\n"
+            + "  'fields.status_code.expression' = '#{regexify ''(200|201|204|400|401|403|301){1}''}',\n"
+            + "  'number-of-rows' = '"
+            + NUM_ROWS
+            + "'\n"
+            + ")");
+
+    TableResult tableResult = tEnv.executeSql("SELECT * FROM server_logs");
+
+    CloseableIterator<Row> collect = tableResult.collect();
+
+    int numRows = 0;
+    while (collect.hasNext()) {
+      collect.next();
+      numRows++;
+    }
+
+    assertThat(numRows).isEqualTo(NUM_ROWS);
+  }
 
   @Test
   public void testFlinkFakerWithLimitedNumberOfRows() {

@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.api.ValidationException;
+import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.factories.DynamicTableSourceFactory;
 import org.apache.flink.table.types.DataType;
@@ -71,20 +73,25 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     context.getCatalogTable().getOptions().forEach(options::setString);
 
     ResolvedSchema schema = context.getCatalogTable().getResolvedSchema();
-    int fieldCount = schema.getColumnCount();
+    List<Column> physicalColumns =
+        schema.getColumns().stream()
+            .filter(column -> column.isPhysical())
+            .collect(Collectors.toList());
+    int fieldCount = physicalColumns.size();
     Float[] fieldNullRates = new Float[fieldCount];
     String[][] fieldExpressions = new String[fieldCount][];
     Integer[] fieldCollectionLengths = new Integer[fieldCount];
 
     for (int i = 0; i < fieldExpressions.length; i++) {
-      String fieldName = schema.getColumn(i).get().getName();
-      DataType dataType = schema.getColumnDataTypes().get(i);
+      String fieldName = physicalColumns.get(i).getName();
+      DataType dataType = physicalColumns.get(i).getDataType();
       validateDataType(fieldName, dataType);
 
       fieldExpressions[i] = readAndValidateFieldExpression(options, fieldName, dataType);
       fieldNullRates[i] = readAndValidateNullRate(options, fieldName);
       fieldCollectionLengths[i] = readAndValidateCollectionLength(options, fieldName, dataType);
     }
+
     return new FlinkFakerTableSource(
         fieldExpressions,
         fieldNullRates,

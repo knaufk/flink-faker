@@ -2,6 +2,7 @@ package com.github.knaufk.flink.faker;
 
 import static com.github.knaufk.flink.faker.FlinkFakerTableSourceFactory.UNLIMITED_ROWS;
 
+import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.source.*;
@@ -32,7 +33,9 @@ public class FlinkFakerTableSource
     this.fieldCollectionLengths = fieldCollectionLengths;
     this.schema = schema;
     types =
-        schema.getColumnDataTypes().stream()
+        schema.getColumns().stream()
+            .filter(column -> column.isPhysical())
+            .map(Column::getDataType)
             .map(DataType::getLogicalType)
             .toArray(LogicalType[]::new);
     this.rowsPerSecond = rowsPerSecond;
