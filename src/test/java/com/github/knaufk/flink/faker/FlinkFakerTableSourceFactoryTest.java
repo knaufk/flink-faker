@@ -196,10 +196,11 @@ class FlinkFakerTableSourceFactoryTest {
 
     CatalogTable table = CatalogTable.of(schema, "comment", Arrays.asList(), properties);
 
-    return FactoryUtil.createTableSource(
+    return FactoryUtil.createDynamicTableSource(
         null,
         ObjectIdentifier.of("", "", ""),
         tableEnvInternal.getCatalogManager().resolveCatalogTable(table),
+        new HashMap<>(),
         new Configuration(),
         Thread.currentThread().getContextClassLoader(),
         false);
