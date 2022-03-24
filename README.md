@@ -17,6 +17,19 @@ This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble
 mvn clean package
 ```
 
+## Compatibility Matrix
+
+| Flink Version | flink-faker Version |
+| ------------- | ------------------- |
+| 1.11          | 0.1.x - 0.4.x        |
+| 1.12          | 0.1.x - 0.4.x        |
+| 1.13          | 0.1.x - 0.4.x        |
+| 1.14          | 0.1.x - 0.4.x        |
+| 1.15          | 0.5.x                |
+
+There are no automated tests that check this compatibility. So, please treat this table as "best knowledge". 
+If you notice any incompatibilities please open an issue.
+
 ## Adding flink-faker to Flink SQL Client
 
 1. Download Flink from the [Apache Flink website](https://flink.apache.org/downloads.html).
