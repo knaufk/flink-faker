@@ -17,6 +17,40 @@ public class FlinkFakerIntegrationTest {
   public static final int NUM_ROWS = 5;
 
   @Test
+  public void testRandomResultsWithoutParallelism() {
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(1);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+
+    tEnv.executeSql(
+            "CREATE TABLE server_logs ( \n"
+                    + "    client_ip STRING,\n"
+                    + "    client_identity STRING, \n"
+                    + "    userid STRING, \n"
+                    + "    log_time AS PROCTIME(),\n"
+                    + "    request_line STRING, \n"
+                    + "    status_code STRING\n"
+                    + ") WITH (\n"
+                    + "  'connector' = 'faker', \n"
+                    + "  'fields.client_ip.expression' = '#{Internet.publicIpV4Address}',\n"
+                    + "  'fields.client_identity.expression' =  '-',\n"
+                    + "  'fields.userid.expression' =  '-',\n"
+                    + "  'fields.request_line.expression' = '#{regexify ''(GET|POST|PUT|PATCH){1}''} #{regexify ''(/search\\.html|/login\\.html|/prod\\.html|cart\\.html|/order\\.html){1}''} #{regexify ''(HTTP/1\\.1|HTTP/2|/HTTP/1\\.0){1}''}',\n"
+                    + "  'fields.status_code.expression' = '#{regexify ''(200|201|204|400|401|403|301){1}''}',\n"
+                    + "  'number-of-rows' = '2'\n"
+                    + ")");
+
+    TableResult tableResult = tEnv.executeSql("SELECT * FROM server_logs");
+
+    CloseableIterator<Row> collect = tableResult.collect();
+
+    Row row1 = collect.next();
+    Row row2 = collect.next();
+
+    assertThat(row1).isNotEqualTo(row2);
+  }
+
+  @Test
   public void testWithComputedColumn() {
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(8);
