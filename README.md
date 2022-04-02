@@ -175,10 +175,8 @@ SELECT * FROM hp;
 
 ### "One Of" Columns
 
-The Java Faker expression to pick a random value from a list of options is not straight forward to get right.
-Actually, I did not manage to get ``Options.option`` work at all.
-As a workaround, I recommend using ``regexify`` for this use case.
-
+There are two ways how it could be done with datafaker expressions.
+1-st way is using ``regexify`` for this use case.
 ```sql
 CREATE TEMPORARY TABLE orders (
   `order_id` INT,
@@ -188,6 +186,21 @@ WITH (
   'connector' = 'faker', 
   'fields.order_id.expression' = '#{number.numberBetween ''0'',''100''}',
   'fields.order_status.expression' = '#{regexify ''(RECEIVED|SHIPPED|CANCELLED){1}''}'
+);
+
+SELECT * FROM orders;
+```
+
+And the second way is usage of ``Options.option``
+```sql
+CREATE TEMPORARY TABLE orders (
+  `order_id` INT,
+  `order_status` STRING
+)
+WITH (
+  'connector' = 'faker',
+  'fields.order_id.expression' = '#{number.numberBetween ''0'',''100''}',
+  'fields.order_status.expression' = '#{Options.option ''RECEIVED'',''SHIPPED'',''CANCELLED'')}'
 );
 
 SELECT * FROM orders;
