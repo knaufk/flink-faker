@@ -175,23 +175,8 @@ SELECT * FROM hp;
 
 ### "One Of" Columns
 
-There are two ways how it could be done with datafaker expressions.
-1-st way is using ``regexify`` for this use case.
-```sql
-CREATE TEMPORARY TABLE orders (
-  `order_id` INT,
-  `order_status` STRING
-)
-WITH (
-  'connector' = 'faker', 
-  'fields.order_id.expression' = '#{number.numberBetween ''0'',''100''}',
-  'fields.order_status.expression' = '#{regexify ''(RECEIVED|SHIPPED|CANCELLED){1}''}'
-);
+Datafaker allows to pick a random value from a list of options via expression ``Options.option``
 
-SELECT * FROM orders;
-```
-
-And the second way is usage of ``Options.option``
 ```sql
 CREATE TEMPORARY TABLE orders (
   `order_id` INT,
