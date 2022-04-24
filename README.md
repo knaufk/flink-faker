@@ -3,10 +3,11 @@
 # flink-faker
 
 flink-faker is an Apache Flink [table source](https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/table/connectors/)
-that generates fake data based on the [Java Faker](https://github.com/DiUS/java-faker) expression
+that generates fake data based on the [Data Faker](https://github.com/datafaker-net/datafaker) expression
 provided for each column.
 
-Checkout this [demo web application](https://java-faker.herokuapp.com/) for some example Java Faker expressions.
+Checkout this [demo web application](https://java-faker.herokuapp.com/) for some example Java Faker
+(fully compatible with Data Faker) expressions and [Data Faker documentation](https://www.datafaker.net/documentation/providers/).
 
 This project is inspired by [voluble](https://github.com/MichaelDrogalis/voluble).
 
@@ -112,7 +113,7 @@ Currently, the `faker` source supports the following data types:
 |-----------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------|
 | `number-of-rows`            | None    | The number of rows to produce. If this is options is set, the source is bounded otherwise it is unbounded and runs indefinitely. |
 | `rows-per-second`           | 10000   | The maximum rate at which the source produces records.                                                                           |
-| `fields.<field>.expression` | None    | The [Java Faker](https://github.com/DiUS/java-faker) expression to generate the values for this field.                           |
+| `fields.<field>.expression` | None    | The [Data Faker](https://www.datafaker.net/documentation/expressions/) expression to generate the values for this field.         |
 | `fields.<field>.null-rate`  | 0.0     | Fraction of rows for which this field is `null`                                                                                  |
 | `fields.<field>.length`     | 1       | Size of array, map or multiset                                                                                                   |
 
