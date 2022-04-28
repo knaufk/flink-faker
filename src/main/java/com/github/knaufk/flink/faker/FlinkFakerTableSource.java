@@ -2,11 +2,18 @@ package com.github.knaufk.flink.faker;
 
 import static com.github.knaufk.flink.faker.FlinkFakerTableSourceFactory.UNLIMITED_ROWS;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.connector.source.lib.NumberSequenceSource;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.connector.ChangelogMode;
+import org.apache.flink.table.connector.ProviderContext;
 import org.apache.flink.table.connector.source.*;
 import org.apache.flink.table.connector.source.abilities.SupportsLimitPushDown;
+import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 
@@ -50,15 +57,29 @@ public class FlinkFakerTableSource
   @Override
   public ScanRuntimeProvider getScanRuntimeProvider(final ScanContext scanContext) {
     boolean isBounded = numberOfRows != UNLIMITED_ROWS;
-    return SourceFunctionProvider.of(
-        new FlinkFakerSourceFunction(
-            fieldExpressions,
-            fieldNullRates,
-            fieldCollectionLengths,
-            types,
-            rowsPerSecond,
-            numberOfRows),
-        isBounded);
+
+    return new DataStreamScanProvider() {
+      @Override
+      public DataStream<RowData> produceDataStream(
+          ProviderContext providerContext, StreamExecutionEnvironment env) {
+
+        long to = isBounded ? numberOfRows : Long.MAX_VALUE;
+        DataStreamSource<Long> sequence =
+            env.fromSource(
+                new NumberSequenceSource(1, to),
+                WatermarkStrategy.noWatermarks(),
+                "Source Generator");
+
+        return sequence.flatMap(
+            new FlinkFakerGenerator(
+                fieldExpressions, fieldNullRates, fieldCollectionLengths, types, rowsPerSecond));
+      }
+
+      @Override
+      public boolean isBounded() {
+        return isBounded;
+      }
+    };
   }
 
   @Override
