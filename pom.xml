@@ -21,14 +21,6 @@
     <log4j.version>2.17.2</log4j.version>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>orgapacheflink-1488</id>
-      <name>Apache Flink 1.15.0 RC 1 Staging Repository</name>
-      <url>https://repository.apache.org/content/repositories/orgapacheflink-1488/</url>
-    </repository>
-  </repositories>
-
   <dependencies>
 
     <!-- runtime dependencies -->
