@@ -30,21 +30,13 @@ mvn clean package
 There are no automated tests that check this compatibility. So, please treat this table as "best knowledge". 
 If you notice any incompatibilities please open an issue.
 
-## Adding flink-faker to Flink SQL Client
+## Using flink-faker with the Flink SQL Client
 
 1. Download Flink from the [Apache Flink website](https://flink.apache.org/downloads.html).
 2. Download the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases) page (or [build it yourself](#package)).
-3. Put the downloaded jars under `FLINK_HOME/lib/`.
+3. Put the downloaded jars under `lib/`.
 4. (Re)Start a [Flink cluster](https://ci.apache.org/projects/flink/flink-docs-stable/docs/try-flink/local_installation/#step-2-start-a-cluster).
 5. (Re)Start the [Flink CLI](https://ci.apache.org/projects/flink/flink-docs-stable/docs/dev/table/sqlclient/).
-
-## Adding flink-faker to Ververica Platform
-
-1. [Setup Ververica Platform](https://docs.ververica.com/getting_started/installation.html).
-2. Get the link to the flink-faker JAR from the [Releases](https://github.com/knaufk/flink-faker/releases).
-3. Start Ververica Platform > SQL > Connectors > Create Connector, provide the external URL from step 2 and finish the setup.
-   
-![Howto add flink-faker to Ververica Platform](add-faker-connector.gif)
 
 ## Usage
 
