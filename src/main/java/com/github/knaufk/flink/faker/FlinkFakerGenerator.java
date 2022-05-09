@@ -41,7 +41,7 @@ class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
   @Override
   public void open(final Configuration parameters) throws Exception {
     super.open(parameters);
-    faker = new FlinkFaker();
+    faker = new Faker();
     rand = new Random();
 
     nextReadTime = System.currentTimeMillis();

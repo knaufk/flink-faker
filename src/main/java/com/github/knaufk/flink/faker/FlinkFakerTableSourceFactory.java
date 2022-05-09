@@ -59,6 +59,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
           LogicalTypeRoot.ROW,
           LogicalTypeRoot.MULTISET,
           LogicalTypeRoot.DATE,
+          LogicalTypeRoot.TIME_WITHOUT_TIME_ZONE,
           LogicalTypeRoot.TIMESTAMP_WITHOUT_TIME_ZONE,
           LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE,
           LogicalTypeRoot.TIMESTAMP_WITH_TIME_ZONE);
@@ -181,7 +182,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     }
 
     try {
-      Faker faker = new FlinkFaker();
+      Faker faker = new Faker();
       for (String expression : fieldExpression) faker.expression(expression);
     } catch (RuntimeException e) {
       throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
