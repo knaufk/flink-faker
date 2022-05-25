@@ -20,6 +20,7 @@ public class TestUtils {
         new BooleanType(),
         new TimestampType(),
         new DateType(),
+        new TimeType(),
         new ArrayType(new IntType()),
         new MapType(new IntType(), new VarCharType()),
         new RowType(
@@ -43,6 +44,7 @@ public class TestUtils {
         {"#{regexify '(true|false){1}'}"},
         {"#{date.past '15','5','SECONDS'}"},
         {"#{date.future '2','1','DAYS'}"},
+        {"#{time.future '2','1','SECONDS'}"},
         {"#{number.numberBetween '-128','127'}"},
         {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},
         {"#{number.numberBetween '-128','127'}", "#{Lorem.characters '10'}"},

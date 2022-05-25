@@ -62,6 +62,7 @@ public class FakerUtils {
                     .getTime()
                 / (86400 * 1000));
       case TIME_WITHOUT_TIME_ZONE:
+        return (int) (Long.parseLong(value) / 1000_000L);
       case TIMESTAMP_WITHOUT_TIME_ZONE:
       case TIMESTAMP_WITH_LOCAL_TIME_ZONE:
         return TimestampData.fromInstant(

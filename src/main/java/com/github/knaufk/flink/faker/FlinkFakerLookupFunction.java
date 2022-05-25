@@ -3,6 +3,7 @@ package com.github.knaufk.flink.faker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import net.datafaker.Faker;
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.functions.FunctionContext;
@@ -17,7 +18,7 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
   private LogicalType[] types;
   private int[][] keys;
   private List<Integer> keyIndeces;
-  private FlinkFaker faker;
+  private Faker faker;
   private Random rand;
 
   public FlinkFakerLookupFunction(
@@ -43,7 +44,7 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
   @Override
   public void open(FunctionContext context) throws Exception {
     super.open(context);
-    faker = new FlinkFaker();
+    faker = new Faker();
     rand = new Random();
   }
 
