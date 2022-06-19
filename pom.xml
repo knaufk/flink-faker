@@ -122,7 +122,7 @@
         <executions>
           <execution>
             <id>spotless-check</id>
-            <phase>verify</phase>
+            <phase>validate</phase>
             <goals>
               <goal>check</goal>
             </goals>
