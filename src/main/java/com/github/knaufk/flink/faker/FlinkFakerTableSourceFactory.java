@@ -67,6 +67,8 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
   public static final List<LogicalTypeRoot> COLLECTION_ROOT_TYPES =
       Arrays.asList(LogicalTypeRoot.ARRAY, LogicalTypeRoot.MAP, LogicalTypeRoot.MULTISET);
 
+  private static final Faker FAKER = new Faker();
+
   @Override
   public FlinkFakerTableSource createDynamicTableSource(final Context context) {
 
@@ -154,7 +156,6 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
       fieldExpression = new String[] {options.get(keyExpression), options.get(valueExpression)};
 
     } else if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.ROW) {
-      StringBuilder stringBuilder = new StringBuilder();
       List<RowType.RowField> rowFields = ((RowType) dataType.getLogicalType()).getFields();
       fieldExpression = new String[rowFields.size()];
       // expression is given element by element
@@ -182,8 +183,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     }
 
     try {
-      Faker faker = new Faker();
-      for (String expression : fieldExpression) faker.expression(expression);
+      for (String expression : fieldExpression) FAKER.expression(expression);
     } catch (RuntimeException e) {
       throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
     }

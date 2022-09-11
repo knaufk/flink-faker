@@ -2,7 +2,6 @@ package com.github.knaufk.flink.faker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.datafaker.Faker;
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
@@ -16,10 +15,8 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
   private Float[] fieldNullRates;
   private Integer[] fieldCollectionLengths;
   private LogicalType[] types;
-  private int[][] keys;
   private List<Integer> keyIndeces;
   private Faker faker;
-  private Random rand;
 
   public FlinkFakerLookupFunction(
       String[][] fieldExpressions,
@@ -37,15 +34,12 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
       // we don't support nested rows for now, so this is actually one-dimensional
       keyIndeces.add(keys[i][0]);
     }
-
-    this.keys = keys;
   }
 
   @Override
   public void open(FunctionContext context) throws Exception {
     super.open(context);
     faker = new Faker();
-    rand = new Random();
   }
 
   public void eval(Object... keys) {
@@ -57,7 +51,7 @@ public class FlinkFakerLookupFunction extends TableFunction<RowData> {
         keyCount++;
       } else {
         float fieldNullRate = fieldNullRates[i];
-        if (rand.nextFloat() > fieldNullRate) {
+        if (faker.random().nextFloat() > fieldNullRate) {
           List<String> values = new ArrayList<>();
           for (int j = 0; j < fieldCollectionLengths[i]; j++) {
             for (int k = 0; k < fieldExpressions[i].length; k++) {

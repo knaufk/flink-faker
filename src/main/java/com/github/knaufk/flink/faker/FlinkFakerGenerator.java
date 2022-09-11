@@ -2,7 +2,6 @@ package com.github.knaufk.flink.faker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.datafaker.Faker;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
@@ -15,7 +14,6 @@ import org.apache.flink.util.Collector;
 class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
 
   private Faker faker;
-  private Random rand;
 
   private String[][] fieldExpressions;
   private Float[] fieldNullRates;
@@ -42,7 +40,6 @@ class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
   public void open(final Configuration parameters) throws Exception {
     super.open(parameters);
     faker = new Faker();
-    rand = new Random();
 
     nextReadTime = System.currentTimeMillis();
     soFarThisSecond = 0;
@@ -74,7 +71,7 @@ class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
     for (int i = 0; i < fieldExpressions.length; i++) {
 
       float fieldNullRate = fieldNullRates[i];
-      if (rand.nextFloat() >= fieldNullRate) {
+      if (faker.random().nextFloat() >= fieldNullRate) {
         List<String> values = new ArrayList<String>();
         for (int j = 0; j < fieldCollectionLengths[i]; j++) {
           for (int k = 0; k < fieldExpressions[i].length; k++) {
