@@ -183,6 +183,40 @@ CREATE TEMPORARY TABLE hp (
 SELECT * FROM hp;
 ```
 
+### On Collection Data Types with nested collections
+
+The usage of `ARRAY`, `MULTISET`, `MAP` and `ROW` types with nested collections is shown in the following example.
+To specify `expression`, `null-rate`, `length` for elements of `ARRAY` or `MULTISET` use `element` like
+```sql
+ 'fields.array-field-name.element.expression' = '#{expression}'
+```
+To specify `expression`, `null-rate`, `length` for elements of `MAP` use `key` and `value` like
+```sql
+ 'fields.array-field-name.key.expression' = '#{key_expression}',
+ 'fields.array-field-name.value.expression' = '#{value_expression}'
+```
+a full example
+```sql
+CREATE TEMPORARY TABLE complex_collections (
+  `locations2character-with-age` MAP<ARRAY<STRING>, ROW<`name` STRING, `age` INT>>,
+  `multiset-house-points` MULTISET<ROW<`house` STRING, `points` INT>>
+) WITH (
+  'connector' = 'faker',
+  'fields.locations2character-with-age.key.element.expression' = '#{harry_potter.location}',
+  'fields.locations2character-with-age.key.element.null-rate' = '0.1',
+  'fields.locations2character-with-age.key.null-rate' = '0.1',
+  'fields.locations2character-with-age.value.name.expression' = '#{harry_potter.character}',
+  'fields.locations2character-with-age.value.name.null-rate' = '0.2',
+  'fields.locations2character-with-age.value.age.expression' = '#{number.numberBetween ''10'',''100''}',
+  'fields.locations2character-with-age.length' = '2',
+  'fields.multiset-house-points.element.house.expression' = '#{harry_potter.house}',
+  'fields.multiset-house-points.element.points.expression' = '#{number.numberBetween ''10'',''100''}',
+  'fields.multiset-house-points.length' = '3'
+);
+
+SELECT * FROM complex_collections;
+```
+
 ### "One Of" Columns
 
 Datafaker allows to pick a random value from a list of options via expression ``Options.option``

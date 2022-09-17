@@ -18,7 +18,9 @@ class FlinkFakerGeneratorTest {
 
     LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
     FlinkFakerGenerator flinkFakerSourceFunction =
-        new FlinkFakerGenerator(fieldExpressions, neverNull(2), getArrayOfOnes(2), types, 100);
+        new FlinkFakerGenerator(
+            TestUtils.constructFieldInfos(fieldExpressions, types, neverNull(2), getArrayOfOnes(2)),
+            100);
     flinkFakerSourceFunction.open(new Configuration());
 
     assertThat(flinkFakerSourceFunction.generateNextRow().getArity()).isEqualTo(2);
@@ -37,7 +39,9 @@ class FlinkFakerGeneratorTest {
       new VarCharType(Integer.MAX_VALUE), new VarCharType(Integer.MAX_VALUE), new IntType()
     };
     FlinkFakerGenerator flinkFakerSourceFunction =
-        new FlinkFakerGenerator(fieldExpressions, neverNull(3), getArrayOfOnes(3), types, 100);
+        new FlinkFakerGenerator(
+            TestUtils.constructFieldInfos(fieldExpressions, types, neverNull(3), getArrayOfOnes(3)),
+            100);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -52,10 +56,11 @@ class FlinkFakerGeneratorTest {
 
     FlinkFakerGenerator flinkFakerSourceFunction =
         new FlinkFakerGenerator(
-            EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            neverNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
-            getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
-            ALL_SUPPORTED_DATA_TYPES,
+            TestUtils.constructFieldInfos(
+                EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+                ALL_SUPPORTED_DATA_TYPES,
+                neverNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
+                getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length)),
             100);
     flinkFakerSourceFunction.open(new Configuration());
 
@@ -71,10 +76,11 @@ class FlinkFakerGeneratorTest {
 
     FlinkFakerGenerator flinkFakerSourceFunction =
         new FlinkFakerGenerator(
-            EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
-            alwaysNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
-            getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
-            ALL_SUPPORTED_DATA_TYPES,
+            TestUtils.constructFieldInfos(
+                EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+                ALL_SUPPORTED_DATA_TYPES,
+                alwaysNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
+                getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length)),
             100);
     flinkFakerSourceFunction.open(new Configuration());
 
