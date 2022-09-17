@@ -13,6 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <flink.version>1.15.2</flink.version>
+    <datafaker.version>1.6.0</datafaker.version>
     <java.version>1.8</java.version>
     <scala.binary.version>2.12</scala.binary.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -43,7 +44,7 @@
     <dependency>
       <groupId>net.datafaker</groupId>
       <artifactId>datafaker</artifactId>
-      <version>1.6.0</version>
+      <version>${datafaker.version}</version>
     </dependency>
 
     <!-- test dependencies -->
