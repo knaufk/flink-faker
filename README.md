@@ -54,7 +54,8 @@ CREATE TEMPORARY TABLE heros (
   'fields.power.null-rate' = '0.05',
   'fields.age.expression' = '#{number.numberBetween ''0'',''1000''}'
 );
-
+```
+```sql
 SELECT * FROM heros;
 ```
 
@@ -72,7 +73,8 @@ WITH (
   'fields.character_id.expression' = '#{number.numberBetween ''0'',''100''}',
   'fields.location.expression' = '#{harry_potter.location}'
 );
-
+```
+```sql
 CREATE TEMPORARY TABLE characters (
   `character_id` INT,
   `name` STRING
@@ -82,7 +84,8 @@ WITH (
   'fields.character_id.expression' = '#{number.numberBetween ''0'',''100''}',
   'fields.name.expression' = '#{harry_potter.characters}'
 );
-
+```
+```sql
 SELECT 
   c.character_id,
   l.location,
@@ -146,7 +149,8 @@ WITH (
   'fields.date1.expression' = '#{date.birthday}',
   'fields.date2.expression' = '#{date.birthday ''1'',''100''}'
 );
-
+```
+```sql
 SELECT * FROM timestamp_time_and_date_example;
 ```
 
@@ -179,7 +183,8 @@ CREATE TEMPORARY TABLE hp (
   'fields.house-points.house.expression' = '#{harry_potter.house}',
   'fields.house-points.points.expression' = '#{number.numberBetween ''10'',''100''}'
 );
-
+```
+```sql
 SELECT * FROM hp;
 ```
 
@@ -197,7 +202,8 @@ WITH (
   'fields.order_id.expression' = '#{number.numberBetween ''0'',''100''}',
   'fields.order_status.expression' = '#{Options.option ''RECEIVED'',''SHIPPED'',''CANCELLED'')}'
 );
-
+```
+```sql
 SELECT * FROM orders;
 ```
 
