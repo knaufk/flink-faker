@@ -5,7 +5,7 @@
 
   <groupId>com.github.knaufk</groupId>
   <artifactId>flink-faker</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.1</version>
   <packaging>jar</packaging>
 
   <name>flink-faker</name>
