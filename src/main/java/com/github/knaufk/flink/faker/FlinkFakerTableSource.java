@@ -13,7 +13,9 @@ import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.connector.ProviderContext;
 import org.apache.flink.table.connector.source.*;
 import org.apache.flink.table.connector.source.abilities.SupportsLimitPushDown;
+import org.apache.flink.table.connector.source.lookup.LookupFunctionProvider;
 import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.functions.LookupFunction;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 
@@ -100,9 +102,13 @@ public class FlinkFakerTableSource
 
   @Override
   public LookupRuntimeProvider getLookupRuntimeProvider(LookupContext context) {
-    return TableFunctionProvider.of(
-        new FlinkFakerLookupFunction(
-            fieldExpressions, fieldNullRates, fieldCollectionLengths, types, context.getKeys()));
+    return new LookupFunctionProvider() {
+      @Override
+      public LookupFunction createLookupFunction() {
+        return new FlinkFakerLookupFunction(
+            fieldExpressions, fieldNullRates, fieldCollectionLengths, types, context.getKeys());
+      }
+    };
   }
 
   @Override
