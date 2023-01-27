@@ -50,6 +50,56 @@ public class FlinkFakerIntegrationTest {
   }
 
   @Test
+  public void testAllPrimitiveDataTypes() {
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(8);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+
+    tEnv.executeSql(
+        "CREATE TABLE all_types ("
+            + "f0 TINYINT, \n"
+            + "f1 SMALLINT, \n"
+            + "f2 INT, \n"
+            + "f3 BIGINT, \n"
+            + "f4 DOUBLE, \n"
+            + "f5 FLOAT, \n"
+            + "f6 DECIMAL(6,3), \n"
+            + "f7 CHAR(10), \n"
+            + "f8 VARCHAR(255), \n"
+            + "f9 STRING, \n"
+            + "f10 BOOLEAN \n"
+            + ") WITH ( \n"
+            + "'connector' = 'faker', \n"
+            + "'number-of-rows' = '"
+            + NUM_ROWS
+            + "', \n"
+            + "'fields.f0.expression' = '#{number.numberBetween ''-128'',''127''}', \n"
+            + "'fields.f1.expression' = '#{number.numberBetween ''-32768'',''32767''}', \n"
+            + "'fields.f2.expression' = '#{number.numberBetween ''-2147483648'',''2147483647''}', \n"
+            + "'fields.f3.expression' = '#{number.randomNumber ''12'',''false''}', \n"
+            + "'fields.f4.expression' = '#{number.randomDouble ''3'',''-999'',''999''}', \n"
+            + "'fields.f5.expression' = '#{number.randomDouble ''3'',''-999'',''999''}', \n"
+            + "'fields.f6.expression' = '#{number.randomDouble ''3'',''-999'',''999''}', \n"
+            + "'fields.f7.expression' = '#{Lorem.characters ''10''}', \n"
+            + "'fields.f8.expression' = '#{Lorem.characters ''255''}', \n"
+            + "'fields.f9.expression' = '#{Lorem.sentence}', \n"
+            + "'fields.f10.expression' = '#{regexify ''(true|false){1}''}' \n"
+            + ");");
+
+    TableResult tableResult = tEnv.executeSql("SELECT * FROM all_types");
+
+    CloseableIterator<Row> collect = tableResult.collect();
+
+    int numRows = 0;
+    while (collect.hasNext()) {
+      collect.next();
+      numRows++;
+    }
+
+    assertThat(numRows).isEqualTo(NUM_ROWS);
+  }
+
+  @Test
   public void testWithComputedColumn() {
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(8);

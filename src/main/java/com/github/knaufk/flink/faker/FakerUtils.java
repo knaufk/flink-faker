@@ -1,7 +1,6 @@
 package com.github.knaufk.flink.faker;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -17,11 +16,7 @@ import org.apache.flink.table.data.GenericMapData;
 import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.data.TimestampData;
-import org.apache.flink.table.types.logical.ArrayType;
-import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.MapType;
-import org.apache.flink.table.types.logical.MultisetType;
-import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.table.types.logical.*;
 
 public class FakerUtils {
 
@@ -42,8 +37,9 @@ public class FakerUtils {
       case BOOLEAN:
         return Boolean.parseBoolean(value);
       case DECIMAL:
+        DecimalType decimalType = (DecimalType) logicalType;
         BigDecimal bd = new BigDecimal(value);
-        return DecimalData.fromBigDecimal(bd, bd.precision(), bd.scale());
+        return DecimalData.fromBigDecimal(bd, decimalType.getPrecision(), decimalType.getScale());
       case TINYINT:
         return Byte.parseByte(value);
       case SMALLINT:
@@ -51,7 +47,7 @@ public class FakerUtils {
       case INTEGER:
         return Integer.parseInt(value);
       case BIGINT:
-        return new BigInteger(value);
+        return Long.valueOf(value);
       case FLOAT:
         return Float.parseFloat(value);
       case DOUBLE:
