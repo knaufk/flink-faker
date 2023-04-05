@@ -211,6 +211,6 @@ SELECT * FROM orders;
 
 ## License
 
-Copyright © 2020-2022 Konstantin Knauf
+Copyright © 2020-2023 Konstantin Knauf
 
 Distributed under Apache License, Version 2.0.
