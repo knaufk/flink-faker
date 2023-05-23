@@ -21,6 +21,7 @@ class FlinkFakerLookupFunctionTest {
     FlinkFakerLookupFunction flinkFakerLookupFunction =
         new FlinkFakerLookupFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+            getDefaultLocales(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             neverNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,
@@ -50,6 +51,7 @@ class FlinkFakerLookupFunctionTest {
     FlinkFakerLookupFunction flinkFakerLookupFunction =
         new FlinkFakerLookupFunction(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+            getDefaultLocales(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             alwaysNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,

@@ -13,6 +13,7 @@ import org.apache.flink.table.types.logical.LogicalType;
 public class FlinkFakerLookupFunction extends LookupFunction {
 
   private String[][] fieldExpressions;
+  private Locale[][] locales;
   private Float[] fieldNullRates;
   private Integer[] fieldCollectionLengths;
   private LogicalType[] types;
@@ -21,11 +22,13 @@ public class FlinkFakerLookupFunction extends LookupFunction {
 
   public FlinkFakerLookupFunction(
       String[][] fieldExpressions,
+      Locale[][] locales,
       Float[] fieldNullRates,
       Integer[] fieldCollectionLengths,
       LogicalType[] types,
       int[][] keys) {
     this.fieldExpressions = fieldExpressions;
+    this.locales = locales;
     this.fieldNullRates = fieldNullRates;
     this.fieldCollectionLengths = fieldCollectionLengths;
     this.types = types;
@@ -58,7 +61,11 @@ public class FlinkFakerLookupFunction extends LookupFunction {
           for (int j = 0; j < fieldCollectionLengths[i]; j++) {
             for (int k = 0; k < fieldExpressions[i].length; k++) {
               // loop for multiple expressions of one field (like map, row fields)
-              values.add(faker.expression(fieldExpressions[i][k]));
+              final int finalI = i;
+              final int finalK = k;
+              values.add(
+                  faker.doWith(
+                      () -> faker.expression(fieldExpressions[finalI][finalK]), locales[i][k]));
             }
           }
           row.setField(

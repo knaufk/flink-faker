@@ -1,7 +1,25 @@
 package com.github.knaufk.flink.faker;
 
 import java.util.Arrays;
-import org.apache.flink.table.types.logical.*;
+import java.util.Locale;
+import org.apache.flink.table.types.logical.ArrayType;
+import org.apache.flink.table.types.logical.BigIntType;
+import org.apache.flink.table.types.logical.BooleanType;
+import org.apache.flink.table.types.logical.CharType;
+import org.apache.flink.table.types.logical.DateType;
+import org.apache.flink.table.types.logical.DecimalType;
+import org.apache.flink.table.types.logical.DoubleType;
+import org.apache.flink.table.types.logical.FloatType;
+import org.apache.flink.table.types.logical.IntType;
+import org.apache.flink.table.types.logical.LogicalType;
+import org.apache.flink.table.types.logical.MapType;
+import org.apache.flink.table.types.logical.MultisetType;
+import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.table.types.logical.SmallIntType;
+import org.apache.flink.table.types.logical.TimeType;
+import org.apache.flink.table.types.logical.TimestampType;
+import org.apache.flink.table.types.logical.TinyIntType;
+import org.apache.flink.table.types.logical.VarCharType;
 
 public class TestUtils {
 
@@ -69,5 +87,11 @@ public class TestUtils {
     Integer[] array = new Integer[size];
     Arrays.fill(array, 1);
     return array;
+  }
+
+  public static Locale[][] getDefaultLocales(int size) {
+    Locale[][] locales = new Locale[size][];
+    Arrays.fill(locales, new Locale[] {Locale.ENGLISH, Locale.ENGLISH});
+    return locales;
   }
 }

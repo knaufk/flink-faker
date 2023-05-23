@@ -2,6 +2,7 @@ package com.github.knaufk.flink.faker;
 
 import static com.github.knaufk.flink.faker.FlinkFakerTableSourceFactory.UNLIMITED_ROWS;
 
+import java.util.Locale;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.connector.source.lib.NumberSequenceSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -23,6 +24,7 @@ public class FlinkFakerTableSource
     implements ScanTableSource, LookupTableSource, SupportsLimitPushDown {
 
   private String[][] fieldExpressions;
+  private Locale[][] locales;
   private Float[] fieldNullRates;
   private Integer[] fieldCollectionLengths;
   private ResolvedSchema schema;
@@ -32,12 +34,14 @@ public class FlinkFakerTableSource
 
   public FlinkFakerTableSource(
       String[][] fieldExpressions,
+      Locale[][] locales,
       Float[] fieldNullRates,
       Integer[] fieldCollectionLengths,
       ResolvedSchema schema,
       long rowsPerSecond,
       long numberOfRows) {
     this.fieldExpressions = fieldExpressions;
+    this.locales = locales;
     this.fieldNullRates = fieldNullRates;
     this.fieldCollectionLengths = fieldCollectionLengths;
     this.schema = schema;
@@ -74,7 +78,12 @@ public class FlinkFakerTableSource
 
         return sequence.flatMap(
             new FlinkFakerGenerator(
-                fieldExpressions, fieldNullRates, fieldCollectionLengths, types, rowsPerSecond));
+                fieldExpressions,
+                locales,
+                fieldNullRates,
+                fieldCollectionLengths,
+                types,
+                rowsPerSecond));
       }
 
       @Override
@@ -88,6 +97,7 @@ public class FlinkFakerTableSource
   public DynamicTableSource copy() {
     return new FlinkFakerTableSource(
         fieldExpressions,
+        locales,
         fieldNullRates,
         fieldCollectionLengths,
         schema,
@@ -106,7 +116,12 @@ public class FlinkFakerTableSource
       @Override
       public LookupFunction createLookupFunction() {
         return new FlinkFakerLookupFunction(
-            fieldExpressions, fieldNullRates, fieldCollectionLengths, types, context.getKeys());
+            fieldExpressions,
+            locales,
+            fieldNullRates,
+            fieldCollectionLengths,
+            types,
+            context.getKeys());
       }
     };
   }
