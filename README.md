@@ -127,6 +127,7 @@ Currently, the `faker` source supports the following data types:
 | `fields.<field>.expression` | None    | The [Data Faker](https://www.datafaker.net/documentation/expressions/) expression to generate the values for this field.         |
 | `fields.<field>.null-rate`  | 0.0     | Fraction of rows for which this field is `null`                                                                                  |
 | `fields.<field>.length`     | 1       | Size of array, map or multiset                                                                                                   |
+| `fields.<field>.locale`     | English | Locale for the corresponding field                                                                                               |
 
 ### On Timestamps
 
@@ -207,6 +208,26 @@ WITH (
 ```
 ```sql
 SELECT * FROM orders;
+```
+
+### Locales
+
+Datafaker allows to specify different locales, however please double-check whether current expressions are supported for the selected locale.
+```sql
+CREATE TEMPORARY TABLE person (
+  `name` STRING,
+  `lastName` STRING
+)
+WITH (
+  'connector' = 'faker',
+  'fields.name.expression' = '#{Name.firstName}',
+  'fields.name.locale' = 'ja-JP',
+  'fields.lastName.expression' = '#{Name.firstName}',
+  'fields.lastName.locale' = 'de-DE'
+);
+```
+```sql
+SELECT * FROM person;
 ```
 
 ## License

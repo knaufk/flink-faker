@@ -244,4 +244,42 @@ public class FlinkFakerIntegrationTest {
     List<Row> rows = CollectionUtil.iteratorToList(table.execute().collect());
     assertThat(rows.size()).isEqualTo(10);
   }
+
+  @Test
+  public void testLocale() throws Exception {
+
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.setParallelism(8);
+    StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+
+    tEnv.executeSql(
+        "CREATE TEMPORARY TABLE faker_table (\n"
+            + "	f0 STRING\n"
+            + ") WITH (\n"
+            + "	'connector' = 'faker',\n"
+            + "	'fields.f0.expression' = '#{Name.firstname}',\n"
+            + "	'fields.f0.locale' = 'ru-RU',\n"
+            + " 'number-of-rows' = '3'\n"
+            + ")");
+
+    TableResult tableResult = tEnv.executeSql("SELECT * FROM faker_table");
+
+    CloseableIterator<Row> collect = tableResult.collect();
+
+    int numRows = 0;
+    while (collect.hasNext()) {
+      Row row = collect.next();
+      // no assertions on map sizes, it may differ from given length due to duplicates
+      assertThat(
+              row.getField("f0")
+                  .toString()
+                  .chars()
+                  .allMatch(
+                      t -> (Character.UnicodeBlock.of(t).equals(Character.UnicodeBlock.CYRILLIC))))
+          .isTrue();
+      numRows++;
+    }
+
+    assertThat(numRows).isEqualTo(3);
+  }
 }

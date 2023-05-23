@@ -5,6 +5,7 @@ import static org.apache.flink.configuration.ConfigOptions.key;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
@@ -26,6 +27,7 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
   public static final String EXPRESSION = "expression";
   public static final String NULL_RATE = "null-rate";
   public static final String COLLECTION_LENGTH = "length";
+  public static final String LOCALE = "locale";
 
   public static final Long ROWS_PER_SECOND_DEFAULT_VALUE = 10000L;
   public static final Long UNLIMITED_ROWS = -1L;
@@ -84,19 +86,23 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     Float[] fieldNullRates = new Float[fieldCount];
     String[][] fieldExpressions = new String[fieldCount][];
     Integer[] fieldCollectionLengths = new Integer[fieldCount];
+    Locale[][] locales = new Locale[fieldCount][];
 
     for (int i = 0; i < fieldExpressions.length; i++) {
       String fieldName = physicalColumns.get(i).getName();
       DataType dataType = physicalColumns.get(i).getDataType();
       validateDataType(fieldName, dataType);
 
-      fieldExpressions[i] = readAndValidateFieldExpression(options, fieldName, dataType);
+      locales[i] = readAndValidateFieldLocales(options, fieldName, dataType);
+      fieldExpressions[i] =
+          readAndValidateFieldExpression(options, fieldName, dataType, locales[i]);
       fieldNullRates[i] = readAndValidateNullRate(options, fieldName);
       fieldCollectionLengths[i] = readAndValidateCollectionLength(options, fieldName, dataType);
     }
 
     return new FlinkFakerTableSource(
         fieldExpressions,
+        locales,
         fieldNullRates,
         fieldCollectionLengths,
         schema,
@@ -143,8 +149,52 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     return fieldNullRate;
   }
 
-  private String[] readAndValidateFieldExpression(
+  private Locale[] readAndValidateFieldLocales(
       Configuration options, String fieldName, DataType dataType) {
+    Locale[] fieldLocale;
+
+    if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.MAP) {
+      // expression is given with key and value
+      ConfigOption<String> keyLocale =
+          key(FIELDS + "." + fieldName + ".key." + LOCALE)
+              .stringType()
+              .defaultValue(Locale.ENGLISH.toLanguageTag());
+      ConfigOption<String> valueLocale =
+          key(FIELDS + "." + fieldName + ".value." + LOCALE)
+              .stringType()
+              .defaultValue(Locale.ENGLISH.toLanguageTag());
+      fieldLocale =
+          new Locale[] {
+            Locale.forLanguageTag(options.get(keyLocale)),
+            Locale.forLanguageTag(options.get(valueLocale))
+          };
+
+    } else if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.ROW) {
+      List<RowType.RowField> rowFields = ((RowType) dataType.getLogicalType()).getFields();
+      fieldLocale = new Locale[rowFields.size()];
+      // expression is given element by element
+      for (int i = 0; i < rowFields.size(); i++) {
+        ConfigOption<String> rowLocale =
+            key(FIELDS + "." + fieldName + "." + rowFields.get(i).getName() + "." + LOCALE)
+                .stringType()
+                .defaultValue(Locale.ENGLISH.toLanguageTag());
+        fieldLocale[i] = Locale.forLanguageTag(options.get(rowLocale));
+      }
+
+    } else {
+      String languageTag =
+          options.get(
+              key(FIELDS + "." + fieldName + "." + LOCALE)
+                  .stringType()
+                  .defaultValue(Locale.ENGLISH.toLanguageTag()));
+      fieldLocale = new Locale[] {Locale.forLanguageTag(languageTag)};
+    }
+
+    return fieldLocale;
+  }
+
+  private String[] readAndValidateFieldExpression(
+      Configuration options, String fieldName, DataType dataType, Locale[] locales) {
     String[] fieldExpression;
 
     if (dataType.getLogicalType().getTypeRoot() == LogicalTypeRoot.MAP) {
@@ -183,7 +233,10 @@ public class FlinkFakerTableSourceFactory implements DynamicTableSourceFactory {
     }
 
     try {
-      for (String expression : fieldExpression) FAKER.expression(expression);
+      for (int i = 0; i < fieldExpression.length; i++) {
+        final int finalI = i;
+        FAKER.doWith(() -> FAKER.expression(fieldExpression[finalI]), locales[i]);
+      }
     } catch (RuntimeException e) {
       throw new ValidationException("Invalid expression for column \"" + fieldName + "\".", e);
     }

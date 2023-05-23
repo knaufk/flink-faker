@@ -18,7 +18,8 @@ class FlinkFakerGeneratorTest {
 
     LogicalType[] types = {new VarCharType(255), new VarCharType(Integer.MAX_VALUE)};
     FlinkFakerGenerator flinkFakerSourceFunction =
-        new FlinkFakerGenerator(fieldExpressions, neverNull(2), getArrayOfOnes(2), types, 100);
+        new FlinkFakerGenerator(
+            fieldExpressions, getDefaultLocales(2), neverNull(2), getArrayOfOnes(2), types, 100);
     flinkFakerSourceFunction.open(new Configuration());
 
     assertThat(flinkFakerSourceFunction.generateNextRow().getArity()).isEqualTo(2);
@@ -37,7 +38,8 @@ class FlinkFakerGeneratorTest {
       new VarCharType(Integer.MAX_VALUE), new VarCharType(Integer.MAX_VALUE), new IntType()
     };
     FlinkFakerGenerator flinkFakerSourceFunction =
-        new FlinkFakerGenerator(fieldExpressions, neverNull(3), getArrayOfOnes(3), types, 100);
+        new FlinkFakerGenerator(
+            fieldExpressions, getDefaultLocales(3), neverNull(3), getArrayOfOnes(3), types, 100);
     flinkFakerSourceFunction.open(new Configuration());
 
     RowData rowData = flinkFakerSourceFunction.generateNextRow();
@@ -53,6 +55,7 @@ class FlinkFakerGeneratorTest {
     FlinkFakerGenerator flinkFakerSourceFunction =
         new FlinkFakerGenerator(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+            getDefaultLocales(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             neverNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,
@@ -72,6 +75,7 @@ class FlinkFakerGeneratorTest {
     FlinkFakerGenerator flinkFakerSourceFunction =
         new FlinkFakerGenerator(
             EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES,
+            getDefaultLocales(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             alwaysNull(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             getArrayOfOnes(EXPRESSIONS_FOR_ALL_SUPPORTED_DATATYPES.length),
             ALL_SUPPORTED_DATA_TYPES,

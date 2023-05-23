@@ -2,6 +2,7 @@ package com.github.knaufk.flink.faker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import net.datafaker.Faker;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
@@ -16,6 +17,7 @@ class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
   private Faker faker;
 
   private String[][] fieldExpressions;
+  private Locale[][] locales;
   private Float[] fieldNullRates;
   private Integer[] fieldCollectionLengths;
   private LogicalType[] types;
@@ -25,11 +27,13 @@ class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
 
   public FlinkFakerGenerator(
       String[][] fieldExpressions,
+      Locale[][] locales,
       Float[] fieldNullRates,
       Integer[] fieldCollectionLengths,
       LogicalType[] types,
       long rowsPerSecond) {
     this.fieldExpressions = fieldExpressions;
+    this.locales = locales;
     this.fieldNullRates = fieldNullRates;
     this.fieldCollectionLengths = fieldCollectionLengths;
     this.types = types;
@@ -76,7 +80,11 @@ class FlinkFakerGenerator extends RichFlatMapFunction<Long, RowData> {
         for (int j = 0; j < fieldCollectionLengths[i]; j++) {
           for (int k = 0; k < fieldExpressions[i].length; k++) {
             // loop for multiple expressions of one field (like map, row fields)
-            values.add(faker.expression(fieldExpressions[i][k]));
+            final int finalI = i;
+            final int finalK = k;
+            values.add(
+                faker.doWith(
+                    () -> faker.expression(fieldExpressions[finalI][finalK]), locales[i][k]));
           }
         }
 
